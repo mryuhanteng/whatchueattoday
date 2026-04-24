@@ -1,0 +1,151 @@
+'use client'
+import { useEffect, useState, useCallback } from 'react'
+import { createClient } from '@/lib/supabase-browser'
+import { useRouter } from 'next/navigation'
+import AddMealModal from '@/components/AddMealModal'
+import MealCard from '@/components/MealCard'
+
+export type Profile = { id: string; username: string; avatar_emoji: string; avatar_color: string }
+export type Meal = {
+  id: string; user_id: string; emoji: string; name: string; description: string;
+  created_at: string; profiles: Profile;
+  reactions: { emoji: string; count: number; user_reacted: boolean }[]
+}
+
+export default function FeedPage() {
+  const [meals, setMeals] = useState<Meal[]>([])
+  const [me, setMe] = useState<Profile | null>(null)
+  const [showModal, setShowModal] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const supabase = createClient()
+  const router = useRouter()
+
+  const loadMe = useCallback(async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { router.push('/auth'); return }
+    const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single()
+    setMe(data)
+  }, [supabase, router])
+
+  const loadMeals = useCallback(async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+
+    const { data: mealsData } = await supabase
+      .from('meals')
+      .select('*, profiles(*)')
+      .order('created_at', { ascending: false })
+      .limit(50)
+
+    if (!mealsData) { setLoading(false); return }
+
+    const { data: reactionsData } = await supabase
+      .from('reactions')
+      .select('meal_id, emoji, user_id')
+
+    const mealsWithReactions = mealsData.map((meal: any) => {
+      const mealReactions = reactionsData?.filter(r => r.meal_id === meal.id) || []
+      const reactionMap: Record<string, { count: number; user_reacted: boolean }> = {}
+      for (const r of mealReactions) {
+        if (!reactionMap[r.emoji]) reactionMap[r.emoji] = { count: 0, user_reacted: false }
+        reactionMap[r.emoji].count++
+        if (r.user_id === user.id) reactionMap[r.emoji].user_reacted = true
+      }
+      const reactions = Object.entries(reactionMap).map(([emoji, v]) => ({ emoji, ...v }))
+      // ensure default emojis always show
+      for (const e of ['😍','🔥','😂']) {
+        if (!reactions.find(r => r.emoji === e)) reactions.push({ emoji: e, count: 0, user_reacted: false })
+      }
+      return { ...meal, reactions }
+    })
+
+    setMeals(mealsWithReactions)
+    setLoading(false)
+  }, [supabase])
+
+  useEffect(() => { loadMe(); loadMeals() }, [loadMe, loadMeals])
+
+  async function handleLogout() {
+    await supabase.auth.signOut()
+    router.push('/auth')
+  }
+
+  async function handleReact(mealId: string, emoji: string) {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+
+    const existing = await supabase
+      .from('reactions')
+      .select('id')
+      .eq('meal_id', mealId)
+      .eq('user_id', user.id)
+      .eq('emoji', emoji)
+      .maybeSingle()
+
+    if (existing.data) {
+      await supabase.from('reactions').delete().eq('id', existing.data.id)
+    } else {
+      await supabase.from('reactions').insert({ meal_id: mealId, user_id: user.id, emoji })
+    }
+    loadMeals()
+  }
+
+  const todayStr = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+
+  return (
+    <div className="page-wrap">
+      <div className="top-bar">
+        <div className="top-bar-logo">🍽️ wcetoday</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {me && (
+            <span style={{ fontSize: 13, color: 'var(--muted)', fontWeight: 700 }}>@{me.username}</span>
+          )}
+          <button onClick={handleLogout} style={{
+            background: 'var(--surface)', border: 'none', borderRadius: 10,
+            padding: '6px 12px', fontSize: 13, fontWeight: 700, color: 'var(--muted)'
+          }}>out</button>
+        </div>
+      </div>
+
+      <div style={{ padding: '16px 20px 4px' }}>
+        <div style={{ fontSize: 18, fontWeight: 800 }}>
+          hey {me?.username ?? '...'} 👋
+        </div>
+        <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 2 }}>{todayStr}</div>
+      </div>
+
+      <button onClick={() => setShowModal(true)} style={{
+        margin: '14px 20px', padding: '14px',
+        borderRadius: '18px', border: '2.5px dashed var(--orange)',
+        background: 'var(--orange-light)', color: 'var(--orange)',
+        fontSize: 15, fontWeight: 800,
+        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+        transition: 'background 0.2s'
+      }}>
+        <span style={{ fontSize: 20 }}>+</span> add what you ate today
+      </button>
+
+      <div className="section-label">today's eats 🔥</div>
+
+      <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 14, paddingBottom: 40 }}>
+        {loading && <p style={{ textAlign: 'center', color: 'var(--muted)', padding: '40px 0' }}>loading...</p>}
+        {!loading && meals.length === 0 && (
+          <p style={{ textAlign: 'center', color: 'var(--muted)', padding: '40px 0', fontSize: 15 }}>
+            no meals yet today 😭<br />be the first to post!
+          </p>
+        )}
+        {meals.map(meal => (
+          <MealCard key={meal.id} meal={meal} currentUserId={me?.id ?? ''} onReact={handleReact} />
+        ))}
+      </div>
+
+      {showModal && me && (
+        <AddMealModal
+          userId={me.id}
+          onClose={() => setShowModal(false)}
+          onPosted={() => { setShowModal(false); loadMeals() }}
+        />
+      )}
+    </div>
+  )
+}
