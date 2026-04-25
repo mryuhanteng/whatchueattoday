@@ -59,11 +59,11 @@ export default function AddMealModal({ userId, onClose, onPosted }: {
       onClick={e => e.target === e.currentTarget && onClose()}
       style={{
         position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
-        zIndex: 100, display: 'flex', alignItems: 'flex-start', paddingTop: '20px', justifyContent: 'center'
+        zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center'
       }}
     >
       <div style={{
-        background: 'var(--bg)', borderRadius: '28px 28px 0 0',
+        background: 'var(--bg)', borderRadius: '28px',
         padding: '24px 24px 48px', width: '100%', maxWidth: '430px',
         maxHeight: 'calc(100vh - 60px)', overflowY: 'auto', marginBottom: '20px'
       }}>
