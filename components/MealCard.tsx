@@ -21,7 +21,7 @@ export default function MealCard({ meal, currentUserId, onReact }: {
     <div className="meal-card">
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
         <div className="avatar" style={{ background: profile?.avatar_color || '#FFE8D6' }}>
-          {profile?.avatar_emoji || '🌟'}
+          {profile?.avatar_emoji || '🍽️'}
         </div>
         <div>
           <div style={{ fontSize: 14, fontWeight: 800 }}>@{profile?.username || 'anon'}</div>
