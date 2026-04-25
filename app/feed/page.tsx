@@ -8,7 +8,7 @@ import MealCard from '@/components/MealCard'
 export type Profile = { id: string; username: string; avatar_emoji: string; avatar_color: string }
 export type Meal = {
   id: string; user_id: string; emoji: string; name: string; description: string;
-  photo_url: string | null;
+  photo_url?: string | null;
   created_at: string; profiles: Profile;
   reactions: { emoji: string; count: number; user_reacted: boolean }[]
 }
