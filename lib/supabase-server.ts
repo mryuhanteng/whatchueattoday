@@ -12,6 +12,7 @@ export function createClient() {
         // @ts-ignore
         setAll(cookiesToSet) {
           try {
+            // @ts-ignore
             cookiesToSet.forEach(({ name, value, options }) =>
               cookieStore.set(name, value, options)
             )
