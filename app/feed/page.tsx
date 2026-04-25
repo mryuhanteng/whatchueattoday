@@ -104,7 +104,7 @@ export default function FeedPage() {
           <button onClick={handleLogout} style={{
             background: 'var(--surface)', border: 'none', borderRadius: 10,
             padding: '6px 12px', fontSize: 13, fontWeight: 700, color: 'var(--muted)'
-          }}>out</button>
+          }}>log out</button>
         </div>
       </div>
 
