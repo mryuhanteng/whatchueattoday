@@ -65,7 +65,7 @@ export default function AddMealModal({ userId, onClose, onPosted }: {
       <div style={{
         background: 'var(--bg)', borderRadius: '28px 28px 0 0',
         padding: '24px 24px 48px', width: '100%', maxWidth: '430px',
-        maxHeight: '90vh', overflowY: 'auto'
+        maxHeight: 'calc(100vh - 60px)', overflowY: 'auto', marginBottom: '20px'
       }}>
         <div style={{ width: 40, height: 4, background: 'var(--border)', borderRadius: 4, margin: '0 auto 20px' }} />
         <div style={{ fontSize: 18, fontWeight: 900, marginBottom: 20 }}>what did you eat? 🍴</div>
