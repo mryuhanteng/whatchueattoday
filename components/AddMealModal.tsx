@@ -59,7 +59,7 @@ export default function AddMealModal({ userId, onClose, onPosted }: {
       onClick={e => e.target === e.currentTarget && onClose()}
       style={{
         position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
-        zIndex: 100, display: 'flex', alignItems: 'flex-start', paddingTop: '40px', justifyContent: 'center'
+        zIndex: 100, display: 'flex', alignItems: 'flex-start', paddingTop: '20px', justifyContent: 'center'
       }}
     >
       <div style={{
@@ -135,5 +135,6 @@ export default function AddMealModal({ userId, onClose, onPosted }: {
     </div>
   )
 }
+
 
 
