@@ -36,6 +36,12 @@ export default function MealCard({ meal, currentUserId, onReact }: {
       </div>
 
       <span style={{ fontSize: 40, marginBottom: 6, display: 'block' }}>{meal.emoji}</span>
+      {meal.photo_url && (
+        <img src={meal.photo_url} alt={meal.name} style={{
+          width: '100%', height: 200, objectFit: 'cover',
+          borderRadius: 12, marginBottom: 8
+        }} />
+      )}
       <div style={{ fontSize: 17, fontWeight: 800, marginBottom: 3 }}>{meal.name}</div>
       {meal.description && (
         <div style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.5 }}>{meal.description}</div>
