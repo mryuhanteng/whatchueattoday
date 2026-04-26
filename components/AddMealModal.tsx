@@ -6,7 +6,6 @@ const EMOJIS = [
   String.fromCodePoint(0x1F355),
   String.fromCodePoint(0x1F35C),
   String.fromCodePoint(0x1F354),
-  String.fromCodePoint(0x1F354),
   String.fromCodePoint(0x1F35E),
   String.fromCodePoint(0x1F363),
   String.fromCodePoint(0x1F357),
@@ -22,7 +21,8 @@ const EMOJIS = [
   String.fromCodePoint(0x1F9C1),
   String.fromCodePoint(0x1F957),
   String.fromCodePoint(0x1F960),
-  String.fromCodePoint(0x1F366),
+  String.fromCodePoint(0x1F96A),
+  String.fromCodePoint(0x1F9C0),
 ]
 
 const EMOJI_CAMERA = String.fromCodePoint(0x1F4F7)
@@ -32,10 +32,19 @@ const EMOJI_ROCKET = String.fromCodePoint(0x1F680)
 const EMOJI_PLATE = String.fromCodePoint(0x1F37D) + String.fromCodePoint(0xFE0F)
 const EMOJI_THINK = String.fromCodePoint(0x1F914)
 
+const CATEGORIES = [
+  { id: 'breakfast', label: 'Breakfast', emoji: String.fromCodePoint(0x1F373) },
+  { id: 'lunch', label: 'Lunch', emoji: String.fromCodePoint(0x1F96A) },
+  { id: 'dinner', label: 'Dinner', emoji: String.fromCodePoint(0x1F37D) + String.fromCodePoint(0xFE0F) },
+  { id: 'snack', label: 'Snack', emoji: String.fromCodePoint(0x1F97F) },
+  { id: 'drinks', label: 'Drinks', emoji: String.fromCodePoint(0x1F964) },
+]
+
 export default function AddMealModal({ userId, onClose, onPosted }: {
   userId: string; onClose: () => void; onPosted: () => void
 }) {
   const [selectedEmoji, setSelectedEmoji] = useState(EMOJIS[0])
+  const [category, setCategory] = useState('breakfast')
   const [name, setName] = useState('')
   const [desc, setDesc] = useState('')
   const [photo, setPhoto] = useState<File | null>(null)
@@ -76,7 +85,7 @@ export default function AddMealModal({ userId, onClose, onPosted }: {
     const { error } = await supabase.from('meals').insert({
       user_id: userId, emoji: selectedEmoji,
       name: name.trim(), description: desc.trim(),
-      photo_url
+      photo_url, category
     })
     if (error) { setError(error.message); setLoading(false); return }
     onPosted()
@@ -97,6 +106,21 @@ export default function AddMealModal({ userId, onClose, onPosted }: {
       }}>
         <div style={{ width: 40, height: 4, background: 'var(--border)', borderRadius: 4, margin: '0 auto 20px' }} />
         <div style={{ fontSize: 18, fontWeight: 900, marginBottom: 20 }}>what did you eat? {EMOJI_PLATE}</div>
+
+        <div className="input-group">
+          <label className="input-label">category</label>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            {CATEGORIES.map(c => (
+              <button key={c.id} onClick={() => setCategory(c.id)} style={{
+                padding: '8px 16px', borderRadius: 20, border: 'none', cursor: 'pointer',
+                fontWeight: 700, fontSize: 13,
+                background: category === c.id ? 'var(--orange)' : 'var(--surface)',
+                color: category === c.id ? 'white' : 'var(--muted)',
+                transition: 'all 0.15s'
+              }}>{c.emoji} {c.label}</button>
+            ))}
+          </div>
+        </div>
 
         <div className="input-group">
           <label className="input-label">add a photo {EMOJI_CAMERA}</label>
