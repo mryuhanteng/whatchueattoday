@@ -106,7 +106,7 @@ export default function FeedPage() {
         <div className="top-bar-logo">{EMOJI_PLATE} whatchueattoday</div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           {me && (
-            <span style={{ fontSize: 13, color: 'var(--muted)', fontWeight: 700 }}>@{me.username}</span>
+            <span onClick={() => router.push(`/profile/${me.username}`)} style={{ fontSize: 13, color: 'var(--muted)', fontWeight: 700, cursor: 'pointer' }}>@{me.username}</span>
           )}
           <button onClick={handleLogout} style={{
             background: 'var(--surface)', border: 'none', borderRadius: 10,
