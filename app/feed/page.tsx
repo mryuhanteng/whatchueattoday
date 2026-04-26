@@ -13,6 +13,8 @@ export type Meal = {
   reactions: { emoji: string; count: number; user_reacted: boolean }[]
 }
 
+const DEFAULT_EMOJIS = ['\u{1F60D}', '\u{1F525}', '\u{1F602}']
+
 export default function FeedPage() {
   const [meals, setMeals] = useState<Meal[]>([])
   const [me, setMe] = useState<Profile | null>(null)
@@ -53,7 +55,69 @@ export default function FeedPage() {
         if (r.user_id === user.id) reactionMap[r.emoji].user_reacted = true
       }
       const reactions = Object.entries(reactionMap).map(([emoji, v]) => ({ emoji, ...v }))
-      for (const e of ['😍','🔥','😂']) {
+      for (const e of DEFAULT_EMOJIS) {
         if (!reactions.find(r => r.emoji === e)) reactions.push({ emoji: e, count: 0, user_reacted: false })
       }
       return { ...meal, reactions }
+    })
+
+    setMeals(mealsWithReactions)
+    setLoading(false)
+  }, [supabase])
+
+  useEffect(() => { loadMe(); loadMeals() }, [loadMe, loadMeals])
+
+  async function handleLogout() {
+    await supabase.auth.signOut()
+    router.push('/auth')
+  }
+
+  async function handleReact(mealId: string, emoji: string) {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+
+    const existing = await supabase
+      .from('reactions')
+      .select('id')
+      .eq('meal_id', mealId)
+      .eq('user_id', user.id)
+      .eq('emoji', emoji)
+      .maybeSingle()
+
+    if (existing.data) {
+      await supabase.from('reactions').delete().eq('id', existing.data.id)
+    } else {
+      await supabase.from('reactions').insert({ meal_id: mealId, user_id: user.id, emoji })
+    }
+    loadMeals()
+  }
+
+  const todayStr = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+
+  return (
+    <div className="page-wrap">
+      <div className="top-bar">
+        <div className="top-bar-logo">{'\u{1F37D}\uFE0F'} whatchueattoday</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {me && (
+            <span style={{ fontSize: 13, color: 'var(--muted)', fontWeight: 700 }}>@{me.username}</span>
+          )}
+          <button onClick={handleLogout} style={{
+            background: 'var(--surface)', border: 'none', borderRadius: 10,
+            padding: '6px 12px', fontSize: 13, fontWeight: 700, color: 'var(--muted)'
+          }}>log out</button>
+        </div>
+      </div>
+
+      <div style={{ padding: '16px 20px 4px' }}>
+        <div style={{ fontSize: 18, fontWeight: 800 }}>
+          hey {me?.username ?? '...'} {'\u{1F44B}'}
+        </div>
+        <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 2 }}>{todayStr}</div>
+      </div>
+
+      <button onClick={() => setShowModal(true)} style={{
+        margin: '14px 20px', padding: '14px',
+        borderRadius: '18px', border: '2.5px dashed var(--orange)',
+        background: 'var(--orange-light)', color: 'var(--orange)',
+        fon
