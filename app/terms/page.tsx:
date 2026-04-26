@@ -1,0 +1,60 @@
+'use client'
+import { useRouter } from 'next/navigation'
+
+const EMOJI_PLATE = String.fromCodePoint(0x1F37D) + String.fromCodePoint(0xFE0F)
+
+export default function TermsPage() {
+  const router = useRouter()
+  return (
+    <div style={{ maxWidth: 600, margin: '0 auto', padding: '40px 24px 80px' }}>
+      <div style={{ fontSize: 32, marginBottom: 8 }}>{EMOJI_PLATE}</div>
+      <h1 style={{ fontSize: 24, fontWeight: 900, color: 'var(--orange)', marginBottom: 4 }}>Terms of Service</h1>
+      <p style={{ color: 'var(--muted)', fontSize: 13, marginBottom: 32 }}>Last updated: April 2026 · whatchueattoday team</p>
+
+      <h2 style={{ fontSize: 16, fontWeight: 800, marginBottom: 8 }}>1. Who Can Use This App</h2>
+      <p style={{ fontSize: 14, color: 'var(--muted)', lineHeight: 1.7, marginBottom: 24 }}>
+        You must be at least 13 years old to use whatchueattoday. If you are under 18, please get a parent or guardian's permission. By using this app, you confirm you meet these requirements.
+      </p>
+
+      <h2 style={{ fontSize: 16, fontWeight: 800, marginBottom: 8 }}>2. What You Can Post</h2>
+      <p style={{ fontSize: 14, color: 'var(--muted)', lineHeight: 1.7, marginBottom: 24 }}>
+        whatchueattoday is a food app. Simple. You may only post content related to food and drinks. The following are strictly prohibited:
+        <br /><br />
+        • Nudity or sexual content<br />
+        • Violent or graphic content<br />
+        • Hate speech or harassment of any kind<br />
+        • Drug-related content<br />
+        • Spam or fake accounts<br />
+        • Impersonating other people<br />
+        • Other people's photos without their permission<br />
+        • Any content that violates New York State or federal law
+      </p>
+
+      <h2 style={{ fontSize: 16, fontWeight: 800, marginBottom: 8 }}>3. Your Content</h2>
+      <p style={{ fontSize: 14, color: 'var(--muted)', lineHeight: 1.7, marginBottom: 24 }}>
+        You own the content you post. By posting, you give whatchueattoday a non-exclusive license to display your content within the app. All meals you post are visible to all users of the app.
+      </p>
+
+      <h2 style={{ fontSize: 16, fontWeight: 800, marginBottom: 8 }}>4. Our Rights</h2>
+      <p style={{ fontSize: 14, color: 'var(--muted)', lineHeight: 1.7, marginBottom: 24 }}>
+        We reserve the right to remove any content that violates these terms, and to suspend or permanently ban accounts without notice. We can modify or shut down the app at any time.
+      </p>
+
+      <h2 style={{ fontSize: 16, fontWeight: 800, marginBottom: 8 }}>5. Liability</h2>
+      <p style={{ fontSize: 14, color: 'var(--muted)', lineHeight: 1.7, marginBottom: 24 }}>
+        whatchueattoday is not responsible for content posted by other users. We are not liable for any damages arising from your use of the app. Use it at your own risk.
+      </p>
+
+      <h2 style={{ fontSize: 16, fontWeight: 800, marginBottom: 8 }}>6. Changes to These Terms</h2>
+      <p style={{ fontSize: 14, color: 'var(--muted)', lineHeight: 1.7, marginBottom: 24 }}>
+        We may update these terms from time to time. Continued use of the app means you accept the new terms.
+      </p>
+
+      <button onClick={() => router.back()} style={{
+        background: 'var(--orange)', color: 'white', border: 'none',
+        borderRadius: 12, padding: '12px 24px', fontWeight: 800,
+        fontSize: 14, cursor: 'pointer'
+      }}>← go back</button>
+    </div>
+  )
+}
