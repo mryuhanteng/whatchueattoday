@@ -26,7 +26,7 @@ const EMOJIS = [
 ]
 
 const EMOJI_CAMERA = String.fromCodePoint(0x1F4F7)
-const EMOJI_CAMERA2 = String.fromCodePoint(0x1F4F6)
+const EMOJI_CAMERA2 = String.fromCodePoint(0x1F4F7)
 const EMOJI_FIRE = String.fromCodePoint(0x1F525)
 const EMOJI_ROCKET = String.fromCodePoint(0x1F680)
 const EMOJI_PLATE = String.fromCodePoint(0x1F37D) + String.fromCodePoint(0xFE0F)
