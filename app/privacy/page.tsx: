@@ -1,0 +1,60 @@
+'use client'
+import { useRouter } from 'next/navigation'
+
+const EMOJI_PLATE = String.fromCodePoint(0x1F37D) + String.fromCodePoint(0xFE0F)
+
+export default function PrivacyPage() {
+  const router = useRouter()
+  return (
+    <div style={{ maxWidth: 600, margin: '0 auto', padding: '40px 24px 80px' }}>
+      <div style={{ fontSize: 32, marginBottom: 8 }}>{EMOJI_PLATE}</div>
+      <h1 style={{ fontSize: 24, fontWeight: 900, color: 'var(--orange)', marginBottom: 4 }}>Privacy Policy</h1>
+      <p style={{ color: 'var(--muted)', fontSize: 13, marginBottom: 32 }}>Last updated: April 2026 · whatchueattoday team</p>
+
+      <h2 style={{ fontSize: 16, fontWeight: 800, marginBottom: 8 }}>1. What We Collect</h2>
+      <p style={{ fontSize: 14, color: 'var(--muted)', lineHeight: 1.7, marginBottom: 24 }}>
+        We collect the following information when you use whatchueattoday:<br /><br />
+        • Your email address (for login)<br />
+        • Your username<br />
+        • Meal posts, photos, and reactions you create<br />
+        • Basic usage data to keep the app running
+      </p>
+
+      <h2 style={{ fontSize: 16, fontWeight: 800, marginBottom: 8 }}>2. How We Use It</h2>
+      <p style={{ fontSize: 14, color: 'var(--muted)', lineHeight: 1.7, marginBottom: 24 }}>
+        We use your information only to run the app — showing your posts in the feed, letting others react, and keeping your account secure. That's it.
+      </p>
+
+      <h2 style={{ fontSize: 16, fontWeight: 800, marginBottom: 8 }}>3. We Don't Sell Your Data</h2>
+      <p style={{ fontSize: 14, color: 'var(--muted)', lineHeight: 1.7, marginBottom: 24 }}>
+        We do not sell, rent, or share your personal data with third parties for marketing purposes. Ever.
+      </p>
+
+      <h2 style={{ fontSize: 16, fontWeight: 800, marginBottom: 8 }}>4. Cookies</h2>
+      <p style={{ fontSize: 14, color: 'var(--muted)', lineHeight: 1.7, marginBottom: 24 }}>
+        We use cookies only for authentication — to keep you logged in. We don't use tracking or advertising cookies.
+      </p>
+
+      <h2 style={{ fontSize: 16, fontWeight: 800, marginBottom: 8 }}>5. Your Rights</h2>
+      <p style={{ fontSize: 14, color: 'var(--muted)', lineHeight: 1.7, marginBottom: 24 }}>
+        You can request deletion of your account and all associated data at any time by contacting us. Under New York law and applicable federal law, you have the right to access, correct, or delete your personal data.
+      </p>
+
+      <h2 style={{ fontSize: 16, fontWeight: 800, marginBottom: 8 }}>6. Data Storage</h2>
+      <p style={{ fontSize: 14, color: 'var(--muted)', lineHeight: 1.7, marginBottom: 24 }}>
+        Your data is stored securely using Supabase. We take reasonable measures to protect your information from unauthorized access.
+      </p>
+
+      <h2 style={{ fontSize: 16, fontWeight: 800, marginBottom: 8 }}>7. Contact</h2>
+      <p style={{ fontSize: 14, color: 'var(--muted)', lineHeight: 1.7, marginBottom: 24 }}>
+        Questions? Reach out to the whatchueattoday team.
+      </p>
+
+      <button onClick={() => router.back()} style={{
+        background: 'var(--orange)', color: 'white', border: 'none',
+        borderRadius: 12, padding: '12px 24px', fontWeight: 800,
+        fontSize: 14, cursor: 'pointer'
+      }}>← go back</button>
+    </div>
+  )
+}
