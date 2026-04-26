@@ -14,6 +14,7 @@ export type Meal = {
 }
 
 const EMOJI_PLATE = String.fromCodePoint(0x1F37D) + String.fromCodePoint(0xFE0F)
+const EMOJI_WAVE = String.fromCodePoint(0x1F44B)
 const EMOJI_SUN = String.fromCodePoint(0x2600) + String.fromCodePoint(0xFE0F)
 const EMOJI_STORM = String.fromCodePoint(0x26C8) + String.fromCodePoint(0xFE0F)
 const DEFAULT_EMOJIS = [EMOJI_SUN, EMOJI_STORM]
