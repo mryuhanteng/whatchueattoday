@@ -26,11 +26,12 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
   return (
     <div onClick={e => e.target === e.currentTarget && onClose()} style={{
       position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
-      zIndex: 200, display: 'flex', alignItems: 'flex-end', justifyContent: 'center'
+      zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center',
+      padding: '20px'
     }}>
       <div style={{
-        background: 'var(--bg)', borderRadius: '24px 24px 0 0',
-        padding: '24px 24px 48px', width: '100%', maxWidth: '480px',
+        background: 'var(--bg)', borderRadius: '28px',
+        padding: '24px 24px 32px', width: '100%', maxWidth: '430px',
         maxHeight: '80vh', overflowY: 'auto'
       }}>
         <div style={{ width: 40, height: 4, background: 'var(--border)', borderRadius: 4, margin: '0 auto 20px' }} />
