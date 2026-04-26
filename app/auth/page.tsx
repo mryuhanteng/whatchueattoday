@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { createClient } from '@/lib/supabase-browser'
 import { useRouter } from 'next/navigation'
 
@@ -27,21 +27,11 @@ export default function AuthPage() {
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [agreed, setAgreed] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [showWelcome, setShowWelcome] = useState(false)
   const router = useRouter()
   const supabase = createClient()
-
-  useEffect(() => {
-    const hash = window.location.hash
-    if (hash.includes('access_token') || hash.includes('type=signup')) {
-      setShowWelcome(true)
-      setTimeout(() => {
-        router.push('/feed')
-      }, 2500)
-    }
-  }, [])
 
   function cleanUsername(val: string) {
     return val.replace('@','').trim().toLowerCase().replace(/[^a-z0-9_]/g, '')
@@ -56,6 +46,7 @@ export default function AuthPage() {
 
   async function handleSignup() {
     setLoading(true); setError('')
+    if (!agreed) { setError('please agree to the terms to continue'); setLoading(false); return }
     const cleanedUsername = cleanUsername(username)
     if (!cleanedUsername) { setError('pick a username! only letters, numbers, underscores'); setLoading(false); return }
     if (cleanedUsername.length < 3) { setError('username must be at least 3 characters'); setLoading(false); return }
@@ -83,27 +74,6 @@ export default function AuthPage() {
       router.push('/feed')
     }
     setLoading(false)
-  }
-
-  if (showWelcome) {
-    return (
-      <div style={{
-        position: 'fixed', inset: 0, background: 'var(--bg)',
-        display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center', gap: 16
-      }}>
-        <div style={{ fontSize: 72 }}>{EMOJI_PLATE}</div>
-        <div style={{
-          fontSize: 26, fontWeight: 900, color: 'var(--orange)',
-          textAlign: 'center', padding: '0 32px', lineHeight: 1.3
-        }}>
-          so... whatchu eating today? {EMOJI_PLATE}
-        </div>
-        <div style={{ fontSize: 15, color: 'var(--muted)', marginTop: 4 }}>
-          taking you to the feed {EMOJI_SPARKLE}
-        </div>
-      </div>
-    )
   }
 
   return (
@@ -157,6 +127,16 @@ export default function AuthPage() {
             value={password} onChange={e => setPassword(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && (tab === 'login' ? handleLogin() : handleSignup())} />
         </div>
+
+        {tab === 'signup' && (
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 16 }}>
+            <input type="checkbox" id="agree" checked={agreed} onChange={e => setAgreed(e.target.checked)}
+              style={{ marginTop: 2, accentColor: 'var(--orange)', width: 16, height: 16, cursor: 'pointer' }} />
+            <label htmlFor="agree" style={{ fontSize: 12, color: 'var(--muted)', lineHeight: 1.5, cursor: 'pointer' }}>
+              I agree to the <a href="/terms" target="_blank" style={{ color: 'var(--orange)', fontWeight: 700 }}>Terms of Service</a> and <a href="/privacy" target="_blank" style={{ color: 'var(--orange)', fontWeight: 700 }}>Privacy Policy</a>. I confirm I am 13 or older.
+            </label>
+          </div>
+        )}
 
         {error && <p className="error-msg">{error}</p>}
 
