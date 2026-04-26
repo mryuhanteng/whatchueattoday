@@ -16,17 +16,23 @@ export type Meal = {
 const EMOJI_PLATE = String.fromCodePoint(0x1F37D) + String.fromCodePoint(0xFE0F)
 const EMOJI_WAVE = String.fromCodePoint(0x1F44B)
 const EMOJI_FIRE = String.fromCodePoint(0x1F525)
+const EMOJI_BELL = String.fromCodePoint(0x1F514)
 const EMOJI_SUN = String.fromCodePoint(0x2600) + String.fromCodePoint(0xFE0F)
 const EMOJI_STORM = String.fromCodePoint(0x26C8) + String.fromCodePoint(0xFE0F)
 const DEFAULT_EMOJIS = [EMOJI_SUN, EMOJI_STORM]
 
+const EMOJI_EGG = String.fromCodePoint(0x1F373)
+const EMOJI_SANDWICH = String.fromCodePoint(0x1F96A)
+const EMOJI_SNACK = String.fromCodePoint(0x1F9C0)
+const EMOJI_DRINK = String.fromCodePoint(0x1F964)
+
 const CATEGORIES = [
   { id: 'all', label: 'All' },
-  { id: 'breakfast', label: '🍳 Breakfast' },
-  { id: 'lunch', label: '🥪 Lunch' },
-  { id: 'dinner', label: '🍽️ Dinner' },
-  { id: 'snack', label: '🥿 Snack' },
-  { id: 'drinks', label: '🥤 Drinks' },
+  { id: 'breakfast', label: EMOJI_EGG + ' Breakfast' },
+  { id: 'lunch', label: EMOJI_SANDWICH + ' Lunch' },
+  { id: 'dinner', label: EMOJI_PLATE + ' Dinner' },
+  { id: 'snack', label: EMOJI_SNACK + ' Snack' },
+  { id: 'drinks', label: EMOJI_DRINK + ' Drinks' },
 ]
 
 export default function FeedPage() {
@@ -35,6 +41,9 @@ export default function FeedPage() {
   const [showModal, setShowModal] = useState(false)
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
+  const [unreadCount, setUnreadCount] = useState(0)
+  const [showNotifs, setShowNotifs] = useState(false)
+  const [notifs, setNotifs] = useState<any[]>([])
   const supabase = createClient()
   const router = useRouter()
 
@@ -81,14 +90,37 @@ export default function FeedPage() {
     setLoading(false)
   }, [supabase])
 
-  useEffect(() => { loadMe(); loadMeals() }, [loadMe, loadMeals])
+  async function loadNotifs() {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    const { data } = await supabase
+      .from('notifications')
+      .select('*, from_user:profiles!notifications_from_user_id_fkey(username, avatar_emoji, avatar_color), meal:meals(name)')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(20)
+    if (data) {
+      setNotifs(data)
+      setUnreadCount(data.filter((n: any) => !n.read).length)
+    }
+  }
+
+  async function markAllRead() {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    await supabase.from('notifications').update({ read: true }).eq('user_id', user.id).eq('read', false)
+    setUnreadCount(0)
+    setNotifs(notifs.map(n => ({ ...n, read: true })))
+  }
+
+  useEffect(() => { loadMe(); loadMeals(); loadNotifs() }, [loadMe, loadMeals])
 
   async function handleLogout() {
     await supabase.auth.signOut()
     router.push('/auth')
   }
 
-async function handleReact(mealId: string, emoji: string) {
+  async function handleReact(mealId: string, emoji: string) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
@@ -124,6 +156,19 @@ async function handleReact(mealId: string, emoji: string) {
           {me && (
             <span onClick={() => router.push(`/profile/${me.username}`)} style={{ fontSize: 13, color: 'var(--muted)', fontWeight: 700, cursor: 'pointer' }}>@{me.username}</span>
           )}
+          <button onClick={() => { setShowNotifs(true); markAllRead() }} style={{
+            background: 'var(--surface)', border: 'none', borderRadius: 10,
+            padding: '6px 10px', fontSize: 18, cursor: 'pointer', position: 'relative'
+          }}>
+            {EMOJI_BELL}
+            {unreadCount > 0 && (
+              <span style={{
+                position: 'absolute', top: 2, right: 2, background: 'red', color: 'white',
+                borderRadius: '50%', width: 16, height: 16, fontSize: 10, fontWeight: 900,
+                display: 'flex', alignItems: 'center', justifyContent: 'center'
+              }}>{unreadCount}</span>
+            )}
+          </button>
           <button onClick={handleLogout} style={{
             background: 'var(--surface)', border: 'none', borderRadius: 10,
             padding: '6px 12px', fontSize: 13, fontWeight: 700, color: 'var(--muted)'
@@ -181,6 +226,39 @@ async function handleReact(mealId: string, emoji: string) {
           onClose={() => setShowModal(false)}
           onPosted={() => { setShowModal(false); loadMeals() }}
         />
+      )}
+
+      {showNotifs && (
+        <div onClick={() => setShowNotifs(false)} style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
+          zIndex: 200, display: 'flex', alignItems: 'flex-end', justifyContent: 'center'
+        }}>
+          <div onClick={e => e.stopPropagation()} style={{
+            background: 'var(--bg)', borderRadius: '24px 24px 0 0',
+            padding: '24px 24px 48px', width: '100%', maxWidth: '480px',
+            maxHeight: '70vh', overflowY: 'auto'
+          }}>
+            <div style={{ width: 40, height: 4, background: 'var(--border)', borderRadius: 4, margin: '0 auto 20px' }} />
+            <div style={{ fontSize: 18, fontWeight: 900, marginBottom: 16 }}>{EMOJI_BELL} notifications</div>
+            {notifs.length === 0 && (
+              <p style={{ textAlign: 'center', color: 'var(--muted)', padding: '40px 0' }}>no notifications yet!</p>
+            )}
+            {notifs.map(n => (
+              <div key={n.id} style={{
+                display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0',
+                borderBottom: '1px solid var(--border)',
+                opacity: n.read ? 0.6 : 1
+              }}>
+                <div className="avatar" style={{ background: n.from_user?.avatar_color || '#FFE8D6', width: 36, height: 36, fontSize: 18, flexShrink: 0 }}>
+                  {n.from_user?.avatar_emoji}
+                </div>
+                <div style={{ fontSize: 13, lineHeight: 1.5 }}>
+                  <span style={{ fontWeight: 800 }}>@{n.from_user?.username}</span> reacted {n.emoji} to your <span style={{ fontWeight: 800 }}>{n.meal?.name}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   )
