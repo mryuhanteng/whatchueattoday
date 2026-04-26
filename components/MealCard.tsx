@@ -1,4 +1,4 @@
-content = """'use client'
+'use client'
 import { Meal } from '@/app/feed/page'
 import { createClient } from '@/lib/supabase-browser'
 
@@ -84,9 +84,3 @@ export default function MealCard({ meal, currentUserId, onReact, onDelete }: {
     </div>
   )
 }
-"""
-
-with open(r'C:\\Users\\yuhan\\Downloads\\whatchueattoday\\components\\MealCard.tsx', 'w', encoding='utf-8') as f:
-    f.write(content)
-
-print("Done! MealCard.tsx written successfully.")
