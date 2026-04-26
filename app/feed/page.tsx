@@ -88,9 +88,10 @@ export default function FeedPage() {
     router.push('/auth')
   }
 
-  async function handleReact(mealId: string, emoji: string) {
+async function handleReact(mealId: string, emoji: string) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
+
     const existing = await supabase
       .from('reactions').select('id')
       .eq('meal_id', mealId).eq('user_id', user.id).eq('emoji', emoji)
@@ -99,6 +100,15 @@ export default function FeedPage() {
       await supabase.from('reactions').delete().eq('id', existing.data.id)
     } else {
       await supabase.from('reactions').insert({ meal_id: mealId, user_id: user.id, emoji })
+      const meal = meals.find(m => m.id === mealId)
+      if (meal && meal.user_id !== user.id) {
+        await supabase.from('notifications').insert({
+          user_id: meal.user_id,
+          from_user_id: user.id,
+          meal_id: mealId,
+          emoji
+        })
+      }
     }
     loadMeals()
   }
