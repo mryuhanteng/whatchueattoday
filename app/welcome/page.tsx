@@ -10,7 +10,7 @@ export default function WelcomePage() {
 
   useEffect(() => {
     setTimeout(() => {
-      router.push('/feed')
+      router.push('/onboarding')
     }, 3000)
   }, [])
 
