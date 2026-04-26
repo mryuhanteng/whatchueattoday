@@ -22,6 +22,48 @@ const EMOJI_PLATE = String.fromCodePoint(0x1F37D) + String.fromCodePoint(0xFE0F)
 const EMOJI_SPARKLE = String.fromCodePoint(0x2728)
 const EMOJI_WAVE = String.fromCodePoint(0x1F44B)
 
+function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
+  return (
+    <div onClick={e => e.target === e.currentTarget && onClose()} style={{
+      position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
+      zIndex: 200, display: 'flex', alignItems: 'flex-end', justifyContent: 'center'
+    }}>
+      <div style={{
+        background: 'var(--bg)', borderRadius: '24px 24px 0 0',
+        padding: '24px 24px 48px', width: '100%', maxWidth: '480px',
+        maxHeight: '80vh', overflowY: 'auto'
+      }}>
+        <div style={{ width: 40, height: 4, background: 'var(--border)', borderRadius: 4, margin: '0 auto 20px' }} />
+        <div style={{ fontSize: 18, fontWeight: 900, marginBottom: 16, color: 'var(--orange)' }}>{title}</div>
+        {children}
+        <button onClick={onClose} style={{
+          width: '100%', marginTop: 24, padding: '14px', borderRadius: 14,
+          background: 'var(--orange)', border: 'none', color: 'white',
+          fontSize: 15, fontWeight: 800, cursor: 'pointer'
+        }}>got it {EMOJI_SPARKLE}</button>
+      </div>
+    </div>
+  )
+}
+
+const TERMS_CONTENT = [
+  { title: '1. Who Can Use This App', body: 'You must be at least 13 years old. If you are under 18, get a parent or guardian\'s permission.' },
+  { title: '2. Food Only', body: 'whatchueattoday is a food app. Only post content related to food and drinks.' },
+  { title: '3. What\'s Not Allowed', body: '• No nudity or sexual content\n• No violent or graphic content\n• No hate speech or harassment\n• No drug-related content\n• No spam or fake accounts\n• No impersonating other people\n• No posting other people\'s photos without permission\n• Nothing that violates New York State or federal law' },
+  { title: '4. Your Content', body: 'You own what you post. By posting, you give whatchueattoday a license to display it. All meals are visible to all users.' },
+  { title: '5. Our Rights', body: 'We can remove content, suspend, or ban accounts that violate these terms. We can modify or shut down the app at any time.' },
+  { title: '6. Liability', body: 'We are not responsible for content posted by other users. Use the app at your own risk.' },
+]
+
+const PRIVACY_CONTENT = [
+  { title: '1. What We Collect', body: '• Your email address\n• Your username\n• Meal posts, photos, and reactions\n• Basic usage data' },
+  { title: '2. How We Use It', body: 'Only to run the app — showing your posts, reactions, and keeping your account secure. That\'s it.' },
+  { title: '3. We Don\'t Sell Your Data', body: 'We do not sell, rent, or share your personal data with third parties. Ever.' },
+  { title: '4. Cookies', body: 'We use cookies only for authentication (keeping you logged in). No tracking or ad cookies.' },
+  { title: '5. Your Rights', body: 'You can request deletion of your account and data anytime. Under New York law, you have the right to access, correct, or delete your data.' },
+  { title: '6. Data Storage', body: 'Your data is stored securely. We take reasonable measures to protect it from unauthorized access.' },
+]
+
 export default function AuthPage() {
   const [tab, setTab] = useState<'login' | 'signup'>('login')
   const [username, setUsername] = useState('')
@@ -30,6 +72,8 @@ export default function AuthPage() {
   const [agreed, setAgreed] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [showTerms, setShowTerms] = useState(false)
+  const [showPrivacy, setShowPrivacy] = useState(false)
   const router = useRouter()
   const supabase = createClient()
 
@@ -133,7 +177,11 @@ export default function AuthPage() {
             <input type="checkbox" id="agree" checked={agreed} onChange={e => setAgreed(e.target.checked)}
               style={{ marginTop: 2, accentColor: 'var(--orange)', width: 16, height: 16, cursor: 'pointer' }} />
             <label htmlFor="agree" style={{ fontSize: 12, color: 'var(--muted)', lineHeight: 1.5, cursor: 'pointer' }}>
-              I agree to the <a href="/terms" target="_blank" style={{ color: 'var(--orange)', fontWeight: 700 }}>Terms of Service</a> and <a href="/privacy" target="_blank" style={{ color: 'var(--orange)', fontWeight: 700 }}>Privacy Policy</a>. I confirm I am 13 or older.
+              I agree to the{' '}
+              <span onClick={() => setShowTerms(true)} style={{ color: 'var(--orange)', fontWeight: 700, cursor: 'pointer' }}>Terms of Service</span>
+              {' '}and{' '}
+              <span onClick={() => setShowPrivacy(true)} style={{ color: 'var(--orange)', fontWeight: 700, cursor: 'pointer' }}>Privacy Policy</span>
+              . I confirm I am 13 or older.
             </label>
           </div>
         )}
@@ -145,6 +193,28 @@ export default function AuthPage() {
           {loading ? '...' : tab === 'login' ? "let's eat " + EMOJI_WAVE : 'create account ' + EMOJI_SPARKLE}
         </button>
       </div>
+
+      {showTerms && (
+        <Modal title={'Terms of Service ' + EMOJI_PLATE} onClose={() => setShowTerms(false)}>
+          {TERMS_CONTENT.map((s, i) => (
+            <div key={i} style={{ marginBottom: 16 }}>
+              <div style={{ fontSize: 13, fontWeight: 800, marginBottom: 4 }}>{s.title}</div>
+              <div style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.6, whiteSpace: 'pre-line' }}>{s.body}</div>
+            </div>
+          ))}
+        </Modal>
+      )}
+
+      {showPrivacy && (
+        <Modal title={'Privacy Policy ' + EMOJI_PLATE} onClose={() => setShowPrivacy(false)}>
+          {PRIVACY_CONTENT.map((s, i) => (
+            <div key={i} style={{ marginBottom: 16 }}>
+              <div style={{ fontSize: 13, fontWeight: 800, marginBottom: 4 }}>{s.title}</div>
+              <div style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.6, whiteSpace: 'pre-line' }}>{s.body}</div>
+            </div>
+          ))}
+        </Modal>
+      )}
     </div>
   )
 }
