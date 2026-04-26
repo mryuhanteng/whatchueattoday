@@ -143,7 +143,7 @@ export default function FeedPage() {
           </p>
         )}
         {meals.map(meal => (
-          <MealCard key={meal.id} meal={meal} currentUserId={me?.id ?? ''} onReact={handleReact} />
+          <MealCard key={meal.id} meal={meal} currentUserId={me?.id ?? ''} onReact={handleReact} onDelete={(id) => setMeals(meals.filter(m => m.id !== id))} />
         ))}
       </div>
 
