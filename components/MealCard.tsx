@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, Fragment } from 'react'
 import { Meal } from '@/app/feed/page'
 import { createClient } from '@/lib/supabase-browser'
 
@@ -41,7 +41,7 @@ export default function MealCard({ meal, currentUserId, onReact, onDelete }: {
   }
 
   return (
-    <>
+    <Fragment>
       <div className="meal-card">
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
           <div className="avatar" style={{ background: profile?.avatar_color || '#FFE8D6' }}>
@@ -93,4 +93,36 @@ export default function MealCard({ meal, currentUserId, onReact, onDelete }: {
       {showConfirm && (
         <div onClick={() => setShowConfirm(false)} style={{
           position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
-          zIndex: 200, display: 'flex', alignItems: 'center
+          zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: '20px'
+        }}>
+          <div onClick={e => e.stopPropagation()} style={{
+            background: 'var(--bg)', borderRadius: '28px',
+            padding: '32px 24px', width: '100%', maxWidth: '340px',
+            textAlign: 'center'
+          }}>
+            <div style={{ fontSize: 52, marginBottom: 12 }}>{EMOJI_EYES}</div>
+            <div style={{ fontSize: 20, fontWeight: 900, marginBottom: 8, color: 'var(--orange)' }}>
+              we gatekeeping?
+            </div>
+            <div style={{ fontSize: 14, color: 'var(--muted)', marginBottom: 24, lineHeight: 1.5 }}>
+              this meal will be gone forever...<br />no take backs bestie {EMOJI_WAVE}
+            </div>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button onClick={() => setShowConfirm(false)} style={{
+                flex: 1, padding: '14px', borderRadius: 14,
+                background: 'var(--surface)', border: 'none',
+                fontWeight: 800, fontSize: 14, cursor: 'pointer', color: 'var(--muted)'
+              }}>nvm keep it</button>
+              <button onClick={handleDelete} disabled={deleting} style={{
+                flex: 1, padding: '14px', borderRadius: 14,
+                background: 'var(--orange)', border: 'none',
+                fontWeight: 800, fontSize: 14, cursor: 'pointer', color: 'white'
+              }}>{deleting ? 'deleting...' : 'yes delete it'}</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </Fragment>
+  )
+}
