@@ -141,16 +141,16 @@ export default function FeedPage() {
 
       <div className="section-label">today's eats {EMOJI_FIRE}</div>
 
-      <div style={{ display: 'flex', gap: 8, padding: '0 20px 12px', overflowX: 'auto' }}>
-        {CATEGORIES.map(c => (
-          <button key={c.id} onClick={() => setFilter(c.id)} style={{
-            padding: '6px 14px', borderRadius: 20, border: 'none', cursor: 'pointer',
-            fontWeight: 700, fontSize: 13, whiteSpace: 'nowrap',
-            background: filter === c.id ? 'var(--orange)' : 'var(--surface)',
-            color: filter === c.id ? 'white' : 'var(--muted)',
-            transition: 'all 0.15s'
-          }}>{c.label}</button>
-        ))}
+      <div style={{ padding: '0 20px 12px' }}>
+        <select value={filter} onChange={e => setFilter(e.target.value)} style={{
+          padding: '8px 14px', borderRadius: 12, border: '1.5px solid var(--border)',
+          background: 'var(--surface)', fontSize: 13, fontWeight: 700,
+          color: 'var(--text)', cursor: 'pointer', outline: 'none'
+        }}>
+          {CATEGORIES.map(c => (
+            <option key={c.id} value={c.id}>{c.label}</option>
+          ))}
+        </select>
       </div>
 
       <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 14, paddingBottom: 40 }}>
