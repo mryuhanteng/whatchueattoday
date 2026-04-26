@@ -60,13 +60,13 @@ export default function OnboardingPage() {
       setSlide(slide + 1)
     } else {
       localStorage.setItem('onboarded', 'true')
-      router.push('/feed')
+      window.location.href = '/feed'
     }
   }
 
   function skip() {
     localStorage.setItem('onboarded', 'true')
-    router.push('/feed')
+    window.location.href = '/feed'
   }
 
   return (
