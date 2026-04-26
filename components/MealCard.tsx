@@ -1,4 +1,4 @@
-'use client'
+content = """'use client'
 import { Meal } from '@/app/feed/page'
 import { createClient } from '@/lib/supabase-browser'
 
@@ -60,4 +60,33 @@ export default function MealCard({ meal, currentUserId, onReact, onDelete }: {
 
       <span style={{ fontSize: 40, marginBottom: 6, display: 'block' }}>{meal.emoji}</span>
       {meal.photo_url && (
-        <img src={meal.photo_url} alt={meal.name} styl
+        <img src={meal.photo_url} alt={meal.name} style={{
+          width: '100%', height: 200, objectFit: 'cover',
+          borderRadius: 12, marginBottom: 8
+        }} />
+      )}
+      <div style={{ fontSize: 17, fontWeight: 800, marginBottom: 3 }}>{meal.name}</div>
+      {meal.description && (
+        <div style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.5 }}>{meal.description}</div>
+      )}
+
+      <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
+        {meal.reactions.filter(r => r.count > 0 || DEFAULT_EMOJIS.includes(r.emoji)).map(r => (
+          <button
+            key={r.emoji}
+            className={`reaction-btn ${r.user_reacted ? 'reacted' : ''}`}
+            onClick={() => onReact(meal.id, r.emoji)}
+          >
+            {r.emoji} {r.count > 0 ? r.count : ''}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+"""
+
+with open(r'C:\\Users\\yuhan\\Downloads\\whatchueattoday\\components\\MealCard.tsx', 'w', encoding='utf-8') as f:
+    f.write(content)
+
+print("Done! MealCard.tsx written successfully.")
