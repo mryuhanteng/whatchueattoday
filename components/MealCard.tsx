@@ -40,7 +40,7 @@ export default function MealCard({ meal, currentUserId, onReact, onDelete }: {
           {profile?.avatar_emoji || EMOJI_PLATE}
         </div>
         <div>
-          <div style={{ fontSize: 14, fontWeight: 800 }}>@{profile?.username || 'anon'}</div>
+          <div style={{ fontSize: 14, fontWeight: 800, cursor: 'pointer' }} onClick={() => window.location.href = `/profile/${profile?.username}`}>@{profile?.username || 'anon'}</div>
           <div style={{ fontSize: 12, color: 'var(--muted)' }}>{timeAgo(meal.created_at)}</div>
         </div>
         {isMe && (
