@@ -158,7 +158,8 @@ export default function FeedPage() {
           )}
           <button onClick={() => { setShowNotifs(!showNotifs); if (!showNotifs) markAllRead() }} style={{
             background: 'var(--surface)', border: 'none', borderRadius: 10,
-            padding: '6px 10px', fontSize: 18, cursor: 'pointer', position: 'relative'
+            padding: '6px 10px', fontSize: 13, cursor: 'pointer', position: 'relative',
+            height: 31, display: 'flex', alignItems: 'center', justifyContent: 'center'
           }}>
             {EMOJI_BELL}
             {unreadCount > 0 && (
