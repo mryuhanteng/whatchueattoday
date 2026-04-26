@@ -2,11 +2,10 @@
 import { Meal } from '@/app/feed/page'
 import { createClient } from '@/lib/supabase-browser'
 
-const EMOJI_LOVE = String.fromCodePoint(0x1F60D)
-const EMOJI_FIRE = String.fromCodePoint(0x1F525)
-const EMOJI_LOL = String.fromCodePoint(0x1F602)
 const EMOJI_PLATE = String.fromCodePoint(0x1F37D) + String.fromCodePoint(0xFE0F)
-const DEFAULT_EMOJIS = [EMOJI_LOVE, EMOJI_FIRE, EMOJI_LOL]
+const EMOJI_SUN = String.fromCodePoint(0x2600) + String.fromCodePoint(0xFE0F)
+const EMOJI_STORM = String.fromCodePoint(0x26C8) + String.fromCodePoint(0xFE0F)
+const DEFAULT_EMOJIS = [EMOJI_SUN, EMOJI_STORM]
 
 function timeAgo(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime()
