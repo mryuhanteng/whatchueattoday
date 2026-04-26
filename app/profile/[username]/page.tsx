@@ -6,11 +6,23 @@ import MealCard from '@/components/MealCard'
 import { Meal } from '@/app/feed/page'
 
 const EMOJI_BACK = String.fromCodePoint(0x2190)
+const EMOJI_SUN = String.fromCodePoint(0x2600) + String.fromCodePoint(0xFE0F)
+const EMOJI_STORM = String.fromCodePoint(0x26C8) + String.fromCodePoint(0xFE0F)
+
+const CATEGORIES = [
+  { id: 'all', label: 'All' },
+  { id: 'breakfast', label: '🍳 Breakfast' },
+  { id: 'lunch', label: '🥪 Lunch' },
+  { id: 'dinner', label: '🍽️ Dinner' },
+  { id: 'snack', label: '🥿 Snack' },
+  { id: 'drinks', label: '🥤 Drinks' },
+]
 
 export default function ProfilePage() {
   const [meals, setMeals] = useState<Meal[]>([])
   const [profile, setProfile] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [filter, setFilter] = useState('all')
   const supabase = createClient()
   const router = useRouter()
   const params = useParams()
@@ -50,8 +62,6 @@ export default function ProfilePage() {
           if (r.user_id === user?.id) reactionMap[r.emoji].user_reacted = true
         }
         const reactions = Object.entries(reactionMap).map(([emoji, v]) => ({ emoji, ...v }))
-        const EMOJI_SUN = String.fromCodePoint(0x2600) + String.fromCodePoint(0xFE0F)
-        const EMOJI_STORM = String.fromCodePoint(0x26C8) + String.fromCodePoint(0xFE0F)
         for (const e of [EMOJI_SUN, EMOJI_STORM]) {
           if (!reactions.find(r => r.emoji === e)) reactions.push({ emoji: e, count: 0, user_reacted: false })
         }
@@ -78,6 +88,8 @@ export default function ProfilePage() {
     }
   }
 
+  const filteredMeals = filter === 'all' ? meals : meals.filter(m => m.category === filter)
+
   return (
     <div className="page-wrap">
       <div className="top-bar">
@@ -103,8 +115,17 @@ export default function ProfilePage() {
         </div>
       )}
 
-      <div style={{ padding: '16px 20px 4px', fontWeight: 800, fontSize: 15 }}>
-        all meals
+      <div style={{ padding: '16px 20px 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ fontWeight: 800, fontSize: 15 }}>all meals</div>
+        <select value={filter} onChange={e => setFilter(e.target.value)} style={{
+          padding: '8px 14px', borderRadius: 12, border: '1.5px solid var(--border)',
+          background: 'var(--surface)', fontSize: 13, fontWeight: 700,
+          color: 'var(--text)', cursor: 'pointer', outline: 'none'
+        }}>
+          {CATEGORIES.map(c => (
+            <option key={c.id} value={c.id}>{c.label}</option>
+          ))}
+        </select>
       </div>
 
       <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 14, paddingBottom: 40 }}>
@@ -112,13 +133,5 @@ export default function ProfilePage() {
         {!loading && !profile && (
           <p style={{ textAlign: 'center', color: 'var(--muted)', padding: '40px 0' }}>user not found</p>
         )}
-        {!loading && profile && meals.length === 0 && (
-          <p style={{ textAlign: 'center', color: 'var(--muted)', padding: '40px 0' }}>no meals yet!</p>
-        )}
-        {meals.map(meal => (
-          <MealCard key={meal.id} meal={meal} currentUserId='' onReact={handleReact} />
-        ))}
-      </div>
-    </div>
-  )
-}
+        {!loading && profile && filteredMeals.length === 0 && (
+          <p style={{ textAlign: 'center', color: 'v
