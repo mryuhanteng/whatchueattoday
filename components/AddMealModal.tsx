@@ -2,12 +2,40 @@
 import { useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase-browser'
 
-const EMOJIS = ['🍕','🍜','🍣','🍔','🥗','🌮','🍱','🥪','🍛','🧆','🥘','🍝','🥩','🍗','🥞','🍳','🥐','🍱','🫕','🥙']
+const EMOJIS = [
+  String.fromCodePoint(0x1F355),
+  String.fromCodePoint(0x1F35C),
+  String.fromCodePoint(0x1F354),
+  String.fromCodePoint(0x1F354),
+  String.fromCodePoint(0x1F35E),
+  String.fromCodePoint(0x1F363),
+  String.fromCodePoint(0x1F357),
+  String.fromCodePoint(0x1F956),
+  String.fromCodePoint(0x1F362),
+  String.fromCodePoint(0x1F366),
+  String.fromCodePoint(0x1F367),
+  String.fromCodePoint(0x1F365),
+  String.fromCodePoint(0x1F96D),
+  String.fromCodePoint(0x1F359),
+  String.fromCodePoint(0x1F9C6),
+  String.fromCodePoint(0x1F373),
+  String.fromCodePoint(0x1F9C1),
+  String.fromCodePoint(0x1F957),
+  String.fromCodePoint(0x1F960),
+  String.fromCodePoint(0x1F366),
+]
+
+const EMOJI_CAMERA = String.fromCodePoint(0x1F4F7)
+const EMOJI_CAMERA2 = String.fromCodePoint(0x1F4F6)
+const EMOJI_FIRE = String.fromCodePoint(0x1F525)
+const EMOJI_ROCKET = String.fromCodePoint(0x1F680)
+const EMOJI_PLATE = String.fromCodePoint(0x1F37D) + String.fromCodePoint(0xFE0F)
+const EMOJI_THINK = String.fromCodePoint(0x1F914)
 
 export default function AddMealModal({ userId, onClose, onPosted }: {
   userId: string; onClose: () => void; onPosted: () => void
 }) {
-  const [selectedEmoji, setSelectedEmoji] = useState('🍕')
+  const [selectedEmoji, setSelectedEmoji] = useState(EMOJIS[0])
   const [name, setName] = useState('')
   const [desc, setDesc] = useState('')
   const [photo, setPhoto] = useState<File | null>(null)
@@ -25,7 +53,7 @@ export default function AddMealModal({ userId, onClose, onPosted }: {
   }
 
   async function submit() {
-    if (!name.trim()) { setError('what did you eat tho? 👀'); return }
+    if (!name.trim()) { setError('what did you eat tho? ' + EMOJI_THINK); return }
     setLoading(true)
 
     let photo_url = null
@@ -68,11 +96,10 @@ export default function AddMealModal({ userId, onClose, onPosted }: {
         maxHeight: 'calc(100vh - 60px)', overflowY: 'auto', marginBottom: '20px'
       }}>
         <div style={{ width: 40, height: 4, background: 'var(--border)', borderRadius: 4, margin: '0 auto 20px' }} />
-        <div style={{ fontSize: 18, fontWeight: 900, marginBottom: 20 }}>what did you eat? 🍴</div>
+        <div style={{ fontSize: 18, fontWeight: 900, marginBottom: 20 }}>what did you eat? {EMOJI_PLATE}</div>
 
-        {/* PHOTO UPLOAD */}
         <div className="input-group">
-          <label className="input-label">add a photo 📸</label>
+          <label className="input-label">add a photo {EMOJI_CAMERA}</label>
           <input ref={fileRef} type="file" accept="image/*" onChange={handlePhoto}
             style={{ display: 'none' }} />
           {photoPreview ? (
@@ -85,7 +112,7 @@ export default function AddMealModal({ userId, onClose, onPosted }: {
                 position: 'absolute', top: 8, right: 8, background: 'rgba(0,0,0,0.6)',
                 border: 'none', borderRadius: '50%', width: 28, height: 28,
                 color: 'white', fontSize: 14, cursor: 'pointer'
-              }}>✕</button>
+              }}>x</button>
             </div>
           ) : (
             <button onClick={() => fileRef.current?.click()} style={{
@@ -93,7 +120,7 @@ export default function AddMealModal({ userId, onClose, onPosted }: {
               border: '2px dashed var(--border)', background: '#FAFAF8',
               fontSize: 14, fontWeight: 700, color: 'var(--muted)', cursor: 'pointer'
             }}>
-              📷 tap to add photo
+              {EMOJI_CAMERA2} tap to add photo
             </button>
           )}
         </div>
@@ -101,8 +128,8 @@ export default function AddMealModal({ userId, onClose, onPosted }: {
         <div className="input-group">
           <label className="input-label">pick an emoji</label>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            {EMOJIS.map(e => (
-              <span key={e} onClick={() => setSelectedEmoji(e)} style={{
+            {EMOJIS.map((e, i) => (
+              <span key={i} onClick={() => setSelectedEmoji(e)} style={{
                 fontSize: 26, padding: '6px 8px', borderRadius: 12, cursor: 'pointer',
                 border: selectedEmoji === e ? '2px solid var(--orange)' : '2px solid transparent',
                 background: selectedEmoji === e ? 'var(--orange-light)' : 'transparent',
@@ -120,7 +147,7 @@ export default function AddMealModal({ userId, onClose, onPosted }: {
 
         <div className="input-group">
           <label className="input-label">say more (optional)</label>
-          <input className="text-input" placeholder="it was bussin no cap 🔥"
+          <input className="text-input" placeholder={'it was bussin no cap ' + EMOJI_FIRE}
             value={desc} onChange={e => setDesc(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && submit()} />
         </div>
@@ -128,15 +155,10 @@ export default function AddMealModal({ userId, onClose, onPosted }: {
         {error && <p className="error-msg">{error}</p>}
 
         <button className="btn-primary" disabled={loading} onClick={submit}>
-          {loading ? 'posting... 🔄' : 'post it 🚀'}
+          {loading ? 'posting...' : 'post it ' + EMOJI_ROCKET}
         </button>
         <button className="btn-ghost" onClick={onClose}>cancel</button>
       </div>
     </div>
   )
 }
-
-
-
-
-
