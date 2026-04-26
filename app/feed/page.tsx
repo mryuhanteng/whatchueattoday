@@ -228,38 +228,34 @@ export default function FeedPage() {
         />
       )}
 
-      {showNotifs && (
-        <div onClick={() => setShowNotifs(false)} style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
-          zIndex: 200, display: 'flex', alignItems: 'flex-end', justifyContent: 'center'
-        }}>
-          <div onClick={e => e.stopPropagation()} style={{
-            background: 'var(--bg)', borderRadius: '24px 24px 0 0',
-            padding: '24px 24px 48px', width: '100%', maxWidth: '480px',
-            maxHeight: '70vh', overflowY: 'auto'
+   {showNotifs && (
+        <>
+          <div onClick={() => setShowNotifs(false)} style={{ position: 'fixed', inset: 0, zIndex: 199 }} />
+          <div style={{
+            position: 'fixed', top: 56, right: 12, zIndex: 200,
+            background: 'var(--bg)', borderRadius: 18,
+            boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
+            width: 300, maxHeight: 400, overflowY: 'auto',
+            border: '1.5px solid var(--border)'
           }}>
-            <div style={{ width: 40, height: 4, background: 'var(--border)', borderRadius: 4, margin: '0 auto 20px' }} />
-            <div style={{ fontSize: 18, fontWeight: 900, marginBottom: 16 }}>{EMOJI_BELL} notifications</div>
+            <div style={{ padding: '16px 16px 8px', fontSize: 15, fontWeight: 900 }}>{EMOJI_BELL} notifications</div>
             {notifs.length === 0 && (
-              <p style={{ textAlign: 'center', color: 'var(--muted)', padding: '40px 0' }}>no notifications yet!</p>
+              <p style={{ textAlign: 'center', color: 'var(--muted)', padding: '24px 0', fontSize: 13 }}>no notifications yet!</p>
             )}
             {notifs.map(n => (
               <div key={n.id} style={{
-                display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0',
-                borderBottom: '1px solid var(--border)',
-                opacity: n.read ? 0.6 : 1
+                display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px',
+                borderTop: '1px solid var(--border)',
+                opacity: n.read ? 0.5 : 1
               }}>
-                <div className="avatar" style={{ background: n.from_user?.avatar_color || '#FFE8D6', width: 36, height: 36, fontSize: 18, flexShrink: 0 }}>
+                <div className="avatar" style={{ background: n.from_user?.avatar_color || '#FFE8D6', width: 32, height: 32, fontSize: 16, flexShrink: 0 }}>
                   {n.from_user?.avatar_emoji}
                 </div>
-                <div style={{ fontSize: 13, lineHeight: 1.5 }}>
+                <div style={{ fontSize: 12, lineHeight: 1.5 }}>
                   <span style={{ fontWeight: 800 }}>@{n.from_user?.username}</span> reacted {n.emoji} to your <span style={{ fontWeight: 800 }}>{n.meal?.name}</span>
                 </div>
               </div>
             ))}
           </div>
-        </div>
+        </>
       )}
-    </div>
-  )
-}
