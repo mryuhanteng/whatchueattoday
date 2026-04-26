@@ -13,7 +13,12 @@ export type Meal = {
   reactions: { emoji: string; count: number; user_reacted: boolean }[]
 }
 
-const DEFAULT_EMOJIS = ['\u{1F60D}', '\u{1F525}', '\u{1F602}']
+const EMOJI_LOVE = String.fromCodePoint(0x1F60D)
+const EMOJI_FIRE = String.fromCodePoint(0x1F525)
+const EMOJI_LOL = String.fromCodePoint(0x1F602)
+const EMOJI_WAVE = String.fromCodePoint(0x1F44B)
+const EMOJI_PLATE = String.fromCodePoint(0x1F37D) + String.fromCodePoint(0xFE0F)
+const DEFAULT_EMOJIS = [EMOJI_LOVE, EMOJI_FIRE, EMOJI_LOL]
 
 export default function FeedPage() {
   const [meals, setMeals] = useState<Meal[]>([])
@@ -97,7 +102,7 @@ export default function FeedPage() {
   return (
     <div className="page-wrap">
       <div className="top-bar">
-        <div className="top-bar-logo">{'\u{1F37D}\uFE0F'} whatchueattoday</div>
+        <div className="top-bar-logo">{EMOJI_PLATE} whatchueattoday</div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           {me && (
             <span style={{ fontSize: 13, color: 'var(--muted)', fontWeight: 700 }}>@{me.username}</span>
@@ -111,7 +116,7 @@ export default function FeedPage() {
 
       <div style={{ padding: '16px 20px 4px' }}>
         <div style={{ fontSize: 18, fontWeight: 800 }}>
-          hey {me?.username ?? '...'} {'\u{1F44B}'}
+          hey {me?.username ?? '...'} {EMOJI_WAVE}
         </div>
         <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 2 }}>{todayStr}</div>
       </div>
@@ -120,4 +125,34 @@ export default function FeedPage() {
         margin: '14px 20px', padding: '14px',
         borderRadius: '18px', border: '2.5px dashed var(--orange)',
         background: 'var(--orange-light)', color: 'var(--orange)',
-        fon
+        fontSize: 15, fontWeight: 800,
+        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+        transition: 'background 0.2s'
+      }}>
+        <span style={{ fontSize: 20 }}>+</span> add what you ate today
+      </button>
+
+      <div className="section-label">today's eats {EMOJI_FIRE}</div>
+
+      <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 14, paddingBottom: 40 }}>
+        {loading && <p style={{ textAlign: 'center', color: 'var(--muted)', padding: '40px 0' }}>loading...</p>}
+        {!loading && meals.length === 0 && (
+          <p style={{ textAlign: 'center', color: 'var(--muted)', padding: '40px 0', fontSize: 15 }}>
+            no meals yet today {EMOJI_PLATE}<br />be the first to post!
+          </p>
+        )}
+        {meals.map(meal => (
+          <MealCard key={meal.id} meal={meal} currentUserId={me?.id ?? ''} onReact={handleReact} />
+        ))}
+      </div>
+
+      {showModal && me && (
+        <AddMealModal
+          userId={me.id}
+          onClose={() => setShowModal(false)}
+          onPosted={() => { setShowModal(false); loadMeals() }}
+        />
+      )}
+    </div>
+  )
+}
