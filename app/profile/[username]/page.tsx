@@ -8,14 +8,19 @@ import { Meal } from '@/app/feed/page'
 const EMOJI_BACK = String.fromCodePoint(0x2190)
 const EMOJI_SUN = String.fromCodePoint(0x2600) + String.fromCodePoint(0xFE0F)
 const EMOJI_STORM = String.fromCodePoint(0x26C8) + String.fromCodePoint(0xFE0F)
+const EMOJI_EGG = String.fromCodePoint(0x1F373)
+const EMOJI_SANDWICH = String.fromCodePoint(0x1F96A)
+const EMOJI_PLATE = String.fromCodePoint(0x1F37D) + String.fromCodePoint(0xFE0F)
+const EMOJI_SNACK = String.fromCodePoint(0x1F9C0)
+const EMOJI_DRINK = String.fromCodePoint(0x1F964)
 
 const CATEGORIES = [
   { id: 'all', label: 'All' },
-  { id: 'breakfast', label: '🍳 Breakfast' },
-  { id: 'lunch', label: '🥪 Lunch' },
-  { id: 'dinner', label: '🍽️ Dinner' },
-  { id: 'snack', label: '🥿 Snack' },
-  { id: 'drinks', label: '🥤 Drinks' },
+  { id: 'breakfast', label: EMOJI_EGG + ' Breakfast' },
+  { id: 'lunch', label: EMOJI_SANDWICH + ' Lunch' },
+  { id: 'dinner', label: EMOJI_PLATE + ' Dinner' },
+  { id: 'snack', label: EMOJI_SNACK + ' Snack' },
+  { id: 'drinks', label: EMOJI_DRINK + ' Drinks' },
 ]
 
 export default function ProfilePage() {
@@ -134,4 +139,12 @@ export default function ProfilePage() {
           <p style={{ textAlign: 'center', color: 'var(--muted)', padding: '40px 0' }}>user not found</p>
         )}
         {!loading && profile && filteredMeals.length === 0 && (
-          <p style={{ textAlign: 'center', color: 'v
+          <p style={{ textAlign: 'center', color: 'var(--muted)', padding: '40px 0' }}>no {filter === 'all' ? 'meals' : filter} yet!</p>
+        )}
+        {filteredMeals.map(meal => (
+          <MealCard key={meal.id} meal={meal} currentUserId='' onReact={handleReact} />
+        ))}
+      </div>
+    </div>
+  )
+}
