@@ -1,10 +1,26 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase-browser'
 import { useRouter } from 'next/navigation'
 
 const AVATAR_COLORS = ['#FFE8D6','#D6F0FF','#FFD6F0','#D6FFE8','#FAFFD6','#F0D6FF']
-const AVATAR_EMOJIS = ['🌟','🎯','🎨','🦊','🎸','🌈','🍀','🦋','🌸','⚡','🎭','🔥']
+const AVATAR_EMOJIS = [
+  String.fromCodePoint(0x1F436),
+  String.fromCodePoint(0x1F431),
+  String.fromCodePoint(0x1F43C),
+  String.fromCodePoint(0x1F98A),
+  String.fromCodePoint(0x1F433),
+  String.fromCodePoint(0x1F426),
+  String.fromCodePoint(0x1F355),
+  String.fromCodePoint(0x1F983),
+  String.fromCodePoint(0x2B50),
+  String.fromCodePoint(0x1F421),
+  String.fromCodePoint(0x1F525),
+]
+
+const EMOJI_PLATE = String.fromCodePoint(0x1F37D) + String.fromCodePoint(0xFE0F)
+const EMOJI_SPARKLE = String.fromCodePoint(0x2728)
+const EMOJI_WAVE = String.fromCodePoint(0x1F44B)
 
 export default function AuthPage() {
   const [tab, setTab] = useState<'login' | 'signup'>('login')
@@ -13,8 +29,19 @@ export default function AuthPage() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [showWelcome, setShowWelcome] = useState(false)
   const router = useRouter()
   const supabase = createClient()
+
+  useEffect(() => {
+    const hash = window.location.hash
+    if (hash.includes('access_token') || hash.includes('type=signup')) {
+      setShowWelcome(true)
+      setTimeout(() => {
+        router.push('/feed')
+      }, 2500)
+    }
+  }, [])
 
   function cleanUsername(val: string) {
     return val.replace('@','').trim().toLowerCase().replace(/[^a-z0-9_]/g, '')
@@ -35,9 +62,8 @@ export default function AuthPage() {
     if (!email.trim()) { setError('enter your email!'); setLoading(false); return }
     if (password.length < 6) { setError('password must be at least 6 characters'); setLoading(false); return }
 
-    // check if username is taken
     const { data: existing } = await supabase.from('profiles').select('id').eq('username', cleanedUsername).maybeSingle()
-    if (existing) { setError('that username is taken 😅 try another!'); setLoading(false); return }
+    if (existing) { setError('that username is taken, try another!'); setLoading(false); return }
 
     const randomEmoji = AVATAR_EMOJIS[Math.floor(Math.random() * AVATAR_EMOJIS.length)]
     const randomColor = AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)]
@@ -59,15 +85,36 @@ export default function AuthPage() {
     setLoading(false)
   }
 
+  if (showWelcome) {
+    return (
+      <div style={{
+        position: 'fixed', inset: 0, background: 'var(--bg)',
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center', gap: 16
+      }}>
+        <div style={{ fontSize: 72 }}>{EMOJI_PLATE}</div>
+        <div style={{
+          fontSize: 26, fontWeight: 900, color: 'var(--orange)',
+          textAlign: 'center', padding: '0 32px', lineHeight: 1.3
+        }}>
+          so... whatchu eating today? {EMOJI_PLATE}
+        </div>
+        <div style={{ fontSize: 15, color: 'var(--muted)', marginTop: 4 }}>
+          taking you to the feed {EMOJI_SPARKLE}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="page-wrap" style={{ alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
       <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-        <div style={{ fontSize: '52px', marginBottom: '8px' }}>🍽️</div>
+        <div style={{ fontSize: '52px', marginBottom: '8px' }}>{EMOJI_PLATE}</div>
         <div style={{ fontFamily: "'Space Mono', monospace", fontWeight: 700, fontSize: '22px', color: 'var(--orange)', marginBottom: '6px' }}>
           whatchueattoday
         </div>
         <div style={{ fontSize: '15px', color: 'var(--muted)' }}>
-          see what everyone's eating & get inspired ✨
+          see what everyone's eating & get inspired {EMOJI_SPARKLE}
         </div>
       </div>
 
@@ -115,7 +162,7 @@ export default function AuthPage() {
 
         <button className="btn-primary" disabled={loading}
           onClick={tab === 'login' ? handleLogin : handleSignup}>
-          {loading ? '...' : tab === 'login' ? "let's eat 🍴" : 'create account 🎉'}
+          {loading ? '...' : tab === 'login' ? "let's eat " + EMOJI_WAVE : 'create account ' + EMOJI_SPARKLE}
         </button>
       </div>
     </div>
