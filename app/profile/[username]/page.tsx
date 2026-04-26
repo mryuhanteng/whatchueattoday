@@ -26,6 +26,7 @@ const CATEGORIES = [
 export default function ProfilePage() {
   const [meals, setMeals] = useState<Meal[]>([])
   const [profile, setProfile] = useState<any>(null)
+  const [currentUserId, setCurrentUserId] = useState('')
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
   const supabase = createClient()
@@ -35,6 +36,9 @@ export default function ProfilePage() {
 
   useEffect(() => {
     async function load() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) setCurrentUserId(user.id)
+
       const { data: profileData } = await supabase
         .from('profiles')
         .select('*')
@@ -53,7 +57,6 @@ export default function ProfilePage() {
 
       if (!mealsData) { setLoading(false); return }
 
-      const { data: { user } } = await supabase.auth.getUser()
       const { data: reactionsData } = await supabase
         .from('reactions')
         .select('meal_id, emoji, user_id')
@@ -142,7 +145,7 @@ export default function ProfilePage() {
           <p style={{ textAlign: 'center', color: 'var(--muted)', padding: '40px 0' }}>no {filter === 'all' ? 'meals' : filter} yet!</p>
         )}
         {filteredMeals.map(meal => (
-          <MealCard key={meal.id} meal={meal} currentUserId='' onReact={handleReact} />
+          <MealCard key={meal.id} meal={meal} currentUserId={currentUserId} onReact={handleReact} onDelete={(id) => setMeals(meals.filter(m => m.id !== id))} />
         ))}
       </div>
     </div>
