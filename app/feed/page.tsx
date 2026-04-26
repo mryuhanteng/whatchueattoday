@@ -42,6 +42,7 @@ export default function FeedPage() {
     const { data: mealsData } = await supabase
       .from('meals')
       .select('*, profiles(*)')
+      .gte('created_at', new Date(new Date().setHours(0,0,0,0)).toISOString())
       .order('created_at', { ascending: false })
       .limit(50)
 
