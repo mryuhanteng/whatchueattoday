@@ -1,0 +1,16 @@
+name: Daily Bot Posts
+
+on:
+  schedule:
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+
+jobs:
+  trigger-bot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger bot
+        run: |
+          curl -X GET \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://whatchueattoday.vercel.app/api/bot
