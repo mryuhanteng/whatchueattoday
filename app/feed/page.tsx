@@ -43,11 +43,12 @@ export default function FeedPage() {
   const [filter, setFilter] = useState('all')
   const [feedMode, setFeedMode] = useState<'everyone' | 'following'>('everyone')
   const [followingIds, setFollowingIds] = useState<string[]>([])
+  const [followingList, setFollowingList] = useState<any[]>([])
+  const [showFollowing, setShowFollowing] = useState(false)
+  const [followSearch, setFollowSearch] = useState('')
   const [unreadCount, setUnreadCount] = useState(0)
   const [showNotifs, setShowNotifs] = useState(false)
   const [notifs, setNotifs] = useState<any[]>([])
-  const [showFollowing, setShowFollowing] = useState(false)
-  const [followingList, setFollowingList] = useState<any[]>([])
   const supabase = createClient()
   const router = useRouter()
 
@@ -57,7 +58,6 @@ export default function FeedPage() {
     const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single()
     setMe(data)
 
-    // Load following IDs
     const { data: followData } = await supabase
       .from('follows')
       .select('following_id, profiles!follows_following_id_fkey(id, username, avatar_emoji, avatar_color)')
@@ -160,10 +160,11 @@ export default function FeedPage() {
   }
 
   const todayStr = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
-
   const filteredMeals = meals
     .filter(m => feedMode === 'everyone' || followingIds.includes(m.user_id) || m.user_id === me?.id)
     .filter(m => filter === 'all' || m.category === filter)
+
+  const filteredFollowing = followingList.filter(f => f?.username?.toLowerCase().includes(followSearch.toLowerCase()))
 
   return (
     <div className="page-wrap">
@@ -211,8 +212,7 @@ export default function FeedPage() {
             {notifs.map(n => (
               <div key={n.id} style={{
                 display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px',
-                borderTop: '1px solid var(--border)',
-                opacity: n.read ? 0.5 : 1
+                borderTop: '1px solid var(--border)', opacity: n.read ? 0.5 : 1
               }}>
                 <div className="avatar" style={{ background: n.from_user?.avatar_color || '#FFE8D6', width: 32, height: 32, fontSize: 16, flexShrink: 0 }}>
                   {n.from_user?.avatar_emoji}
@@ -226,15 +226,53 @@ export default function FeedPage() {
         </Fragment>
       )}
 
-      <div style={{ padding: '16px 20px 4px' }}>
-        <div style={{ fontSize: 18, fontWeight: 800 }}>
-          hey {me?.username ?? '...'} {EMOJI_WAVE}
+      {showFollowing && (
+        <div onClick={() => { setShowFollowing(false); setFollowSearch('') }} style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
+          zIndex: 200, display: 'flex', alignItems: 'flex-end', justifyContent: 'center'
+        }}>
+          <div onClick={e => e.stopPropagation()} style={{
+            background: 'var(--bg)', borderRadius: '24px 24px 0 0',
+            padding: '24px 24px 48px', width: '100%', maxWidth: '480px',
+            maxHeight: '70vh', overflowY: 'auto'
+          }}>
+            <div style={{ width: 40, height: 4, background: 'var(--border)', borderRadius: 4, margin: '0 auto 16px' }} />
+            <div style={{ fontSize: 16, fontWeight: 900, marginBottom: 16 }}>people you follow</div>
+            <input
+              placeholder="search..."
+              value={followSearch}
+              onChange={e => setFollowSearch(e.target.value)}
+              style={{
+                width: '100%', padding: '10px 14px', borderRadius: 12,
+                border: '1.5px solid var(--border)', fontSize: 14,
+                marginBottom: 16, boxSizing: 'border-box', outline: 'none',
+                background: 'var(--surface)'
+              }}
+            />
+            {filteredFollowing.length === 0 && (
+              <p style={{ textAlign: 'center', color: 'var(--muted)', padding: '20px 0' }}>nobody found</p>
+            )}
+            {filteredFollowing.map((f: any) => (
+              <div key={f.id} onClick={() => { setShowFollowing(false); setFollowSearch(''); router.push(`/profile/${f.username}`) }} style={{
+                display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0',
+                borderBottom: '1px solid var(--border)', cursor: 'pointer'
+              }}>
+                <div className="avatar" style={{ background: f.avatar_color, width: 44, height: 44, fontSize: 22, flexShrink: 0 }}>
+                  {f.avatar_emoji}
+                </div>
+                <div style={{ fontWeight: 700, fontSize: 14 }}>@{f.username}</div>
+              </div>
+            ))}
+          </div>
         </div>
+      )}
+
+      <div style={{ padding: '16px 20px 4px' }}>
+        <div style={{ fontSize: 18, fontWeight: 800 }}>hey {me?.username ?? '...'} {EMOJI_WAVE}</div>
         <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 2 }}>{todayStr}</div>
       </div>
 
-      {/* Feed mode toggle */}
-      <div style={{ display: 'flex', margin: '12px 20px 0', background: 'var(--surface)', borderRadius: 14, padding: 4 }}>
+      <div style={{ display: 'flex', margin: '12px 20px 0', background: 'var(--surface)', borderRadius: 14, padding: 4, alignItems: 'center' }}>
         <button onClick={() => setFeedMode('everyone')} style={{
           flex: 1, padding: '8px', borderRadius: 10, border: 'none', cursor: 'pointer',
           background: feedMode === 'everyone' ? 'white' : 'transparent',
@@ -251,21 +289,13 @@ export default function FeedPage() {
           boxShadow: feedMode === 'following' ? '0 1px 4px rgba(0,0,0,0.1)' : 'none',
           transition: 'all 0.2s'
         }}>following</button>
+        {feedMode === 'following' && (
+          <button onClick={() => setShowFollowing(true)} style={{
+            background: 'none', border: 'none', cursor: 'pointer',
+            fontSize: 12, fontWeight: 700, color: 'var(--orange)', padding: '0 8px'
+          }}>see all</button>
+        )}
       </div>
-
-      {/* Following list */}
-      {feedMode === 'following' && followingList.length > 0 && (
-        <div style={{ padding: '12px 20px 0', display: 'flex', gap: 12, overflowX: 'auto' }}>
-          {followingList.map((f: any) => (
-            <div key={f.id} onClick={() => router.push(`/profile/${f.username}`)} style={{ textAlign: 'center', cursor: 'pointer', flexShrink: 0 }}>
-              <div className="avatar" style={{ background: f.avatar_color, width: 44, height: 44, fontSize: 22, margin: '0 auto 4px' }}>
-                {f.avatar_emoji}
-              </div>
-              <div style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 700 }}>@{f.username}</div>
-            </div>
-          ))}
-        </div>
-      )}
 
       <button onClick={() => setShowModal(true)} style={{
         margin: '14px 20px', padding: '14px',
