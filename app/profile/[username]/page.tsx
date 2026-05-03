@@ -29,6 +29,10 @@ export default function ProfilePage() {
   const [currentUserId, setCurrentUserId] = useState('')
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
+  const [isFollowing, setIsFollowing] = useState(false)
+  const [followerCount, setFollowerCount] = useState(0)
+  const [followingCount, setFollowingCount] = useState(0)
+  const [followLoading, setFollowLoading] = useState(false)
   const supabase = createClient()
   const router = useRouter()
   const params = useParams()
@@ -47,6 +51,31 @@ export default function ProfilePage() {
 
       if (!profileData) { setLoading(false); return }
       setProfile(profileData)
+
+      // Load follow counts
+      const { count: followers } = await supabase
+        .from('follows')
+        .select('*', { count: 'exact', head: true })
+        .eq('following_id', profileData.id)
+
+      const { count: following } = await supabase
+        .from('follows')
+        .select('*', { count: 'exact', head: true })
+        .eq('follower_id', profileData.id)
+
+      setFollowerCount(followers || 0)
+      setFollowingCount(following || 0)
+
+      // Check if current user follows this profile
+      if (user) {
+        const { data: followData } = await supabase
+          .from('follows')
+          .select('id')
+          .eq('follower_id', user.id)
+          .eq('following_id', profileData.id)
+          .maybeSingle()
+        setIsFollowing(!!followData)
+      }
 
       const { data: mealsData } = await supabase
         .from('meals')
@@ -82,6 +111,26 @@ export default function ProfilePage() {
     load()
   }, [username])
 
+  async function handleFollow() {
+    if (!currentUserId || !profile) return
+    setFollowLoading(true)
+    if (isFollowing) {
+      await supabase.from('follows').delete()
+        .eq('follower_id', currentUserId)
+        .eq('following_id', profile.id)
+      setIsFollowing(false)
+      setFollowerCount(c => c - 1)
+    } else {
+      await supabase.from('follows').insert({
+        follower_id: currentUserId,
+        following_id: profile.id
+      })
+      setIsFollowing(true)
+      setFollowerCount(c => c + 1)
+    }
+    setFollowLoading(false)
+  }
+
   async function handleReact(mealId: string, emoji: string) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
@@ -97,6 +146,7 @@ export default function ProfilePage() {
   }
 
   const filteredMeals = filter === 'all' ? meals : meals.filter(m => m.category === filter)
+  const isMe = currentUserId === profile?.id
 
   return (
     <div className="page-wrap">
@@ -117,9 +167,33 @@ export default function ProfilePage() {
             {profile.avatar_emoji}
           </div>
           <div style={{ fontWeight: 800, fontSize: 18 }}>@{profile.username}</div>
-          <div style={{ color: 'var(--muted)', fontSize: 13, marginTop: 4 }}>
-            {meals.length} meals posted
+
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 32, margin: '12px 0' }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontWeight: 800, fontSize: 18 }}>{meals.length}</div>
+              <div style={{ fontSize: 12, color: 'var(--muted)' }}>meals</div>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontWeight: 800, fontSize: 18 }}>{followerCount}</div>
+              <div style={{ fontSize: 12, color: 'var(--muted)' }}>followers</div>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontWeight: 800, fontSize: 18 }}>{followingCount}</div>
+              <div style={{ fontSize: 12, color: 'var(--muted)' }}>following</div>
+            </div>
           </div>
+
+          {!isMe && currentUserId && (
+            <button onClick={handleFollow} disabled={followLoading} style={{
+              padding: '10px 32px', borderRadius: 20, border: 'none',
+              background: isFollowing ? 'var(--surface)' : 'var(--orange)',
+              color: isFollowing ? 'var(--muted)' : 'white',
+              fontWeight: 800, fontSize: 14, cursor: 'pointer',
+              transition: 'all 0.2s'
+            }}>
+              {followLoading ? '...' : isFollowing ? 'following' : 'follow'}
+            </button>
+          )}
         </div>
       )}
 
