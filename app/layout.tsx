@@ -5,14 +5,23 @@ export const metadata: Metadata = {
   title: 'whatchueattoday',
   description: 'see what everyone\'s eating & get inspired',
   icons: {
-    icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍽️</text></svg>",
-  }
+    icon: '/icon-192.png',
+    apple: '/icon-192.png',
+  },
+  manifest: '/manifest.json',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <head>
+        <meta name="application-name" content="whatchueattoday" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="whatchueattoday" />
+        <meta name="theme-color" content="#E85D04" />
+        <link rel="apple-touch-icon" href="/icon-192.png" />
+        <link rel="manifest" href="/manifest.json" />
         <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
         <script dangerouslySetInnerHTML={{ __html: `
           window.OneSignalDeferred = window.OneSignalDeferred || [];
