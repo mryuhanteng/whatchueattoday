@@ -41,9 +41,13 @@ export default function FeedPage() {
   const [showModal, setShowModal] = useState(false)
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
+  const [feedMode, setFeedMode] = useState<'everyone' | 'following'>('everyone')
+  const [followingIds, setFollowingIds] = useState<string[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [showNotifs, setShowNotifs] = useState(false)
   const [notifs, setNotifs] = useState<any[]>([])
+  const [showFollowing, setShowFollowing] = useState(false)
+  const [followingList, setFollowingList] = useState<any[]>([])
   const supabase = createClient()
   const router = useRouter()
 
@@ -52,6 +56,17 @@ export default function FeedPage() {
     if (!user) { router.push('/auth'); return }
     const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single()
     setMe(data)
+
+    // Load following IDs
+    const { data: followData } = await supabase
+      .from('follows')
+      .select('following_id, profiles!follows_following_id_fkey(id, username, avatar_emoji, avatar_color)')
+      .eq('follower_id', user.id)
+
+    if (followData) {
+      setFollowingIds(followData.map((f: any) => f.following_id))
+      setFollowingList(followData.map((f: any) => f.profiles))
+    }
   }, [supabase, router])
 
   const loadMeals = useCallback(async () => {
@@ -123,7 +138,6 @@ export default function FeedPage() {
   async function handleReact(mealId: string, emoji: string) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
-
     const existing = await supabase
       .from('reactions').select('id')
       .eq('meal_id', mealId).eq('user_id', user.id).eq('emoji', emoji)
@@ -146,7 +160,10 @@ export default function FeedPage() {
   }
 
   const todayStr = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
-  const filteredMeals = filter === 'all' ? meals : meals.filter(m => m.category === filter)
+
+  const filteredMeals = meals
+    .filter(m => feedMode === 'everyone' || followingIds.includes(m.user_id) || m.user_id === me?.id)
+    .filter(m => filter === 'all' || m.category === filter)
 
   return (
     <div className="page-wrap">
@@ -216,6 +233,40 @@ export default function FeedPage() {
         <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 2 }}>{todayStr}</div>
       </div>
 
+      {/* Feed mode toggle */}
+      <div style={{ display: 'flex', margin: '12px 20px 0', background: 'var(--surface)', borderRadius: 14, padding: 4 }}>
+        <button onClick={() => setFeedMode('everyone')} style={{
+          flex: 1, padding: '8px', borderRadius: 10, border: 'none', cursor: 'pointer',
+          background: feedMode === 'everyone' ? 'white' : 'transparent',
+          fontWeight: 700, fontSize: 13,
+          color: feedMode === 'everyone' ? 'var(--text)' : 'var(--muted)',
+          boxShadow: feedMode === 'everyone' ? '0 1px 4px rgba(0,0,0,0.1)' : 'none',
+          transition: 'all 0.2s'
+        }}>everyone</button>
+        <button onClick={() => setFeedMode('following')} style={{
+          flex: 1, padding: '8px', borderRadius: 10, border: 'none', cursor: 'pointer',
+          background: feedMode === 'following' ? 'white' : 'transparent',
+          fontWeight: 700, fontSize: 13,
+          color: feedMode === 'following' ? 'var(--text)' : 'var(--muted)',
+          boxShadow: feedMode === 'following' ? '0 1px 4px rgba(0,0,0,0.1)' : 'none',
+          transition: 'all 0.2s'
+        }}>following</button>
+      </div>
+
+      {/* Following list */}
+      {feedMode === 'following' && followingList.length > 0 && (
+        <div style={{ padding: '12px 20px 0', display: 'flex', gap: 12, overflowX: 'auto' }}>
+          {followingList.map((f: any) => (
+            <div key={f.id} onClick={() => router.push(`/profile/${f.username}`)} style={{ textAlign: 'center', cursor: 'pointer', flexShrink: 0 }}>
+              <div className="avatar" style={{ background: f.avatar_color, width: 44, height: 44, fontSize: 22, margin: '0 auto 4px' }}>
+                {f.avatar_emoji}
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 700 }}>@{f.username}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
       <button onClick={() => setShowModal(true)} style={{
         margin: '14px 20px', padding: '14px',
         borderRadius: '18px', border: '2.5px dashed var(--orange)',
@@ -243,9 +294,14 @@ export default function FeedPage() {
 
       <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 14, paddingBottom: 40 }}>
         {loading && <p style={{ textAlign: 'center', color: 'var(--muted)', padding: '40px 0' }}>loading...</p>}
-        {!loading && filteredMeals.length === 0 && (
+        {!loading && filteredMeals.length === 0 && feedMode === 'following' && (
           <p style={{ textAlign: 'center', color: 'var(--muted)', padding: '40px 0', fontSize: 15 }}>
-            no {filter === 'all' ? 'meals' : filter} yet today {EMOJI_PLATE}<br />be the first to post!
+            follow some people to see their meals here {EMOJI_PLATE}
+          </p>
+        )}
+        {!loading && filteredMeals.length === 0 && feedMode === 'everyone' && (
+          <p style={{ textAlign: 'center', color: 'var(--muted)', padding: '40px 0', fontSize: 15 }}>
+            no meals yet today {EMOJI_PLATE}<br />be the first to post!
           </p>
         )}
         {filteredMeals.map(meal => (
