@@ -1,10 +1,7 @@
-import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+export const dynamic = 'force-dynamic'
+export const runtime = 'edge'
 
 const BOT_USER_ID = '9c5dad3b-b305-4def-a20c-2671693476e9'
 
@@ -12,8 +9,8 @@ const MEALS = {
   breakfast: [
     { emoji: '🍳', name: 'classic eggs & toast', description: 'simple but never wrong' },
     { emoji: '🥞', name: 'fluffy pancakes', description: 'weekend energy on a weekday' },
-    { emoji: '🍌', name: 'smoothie bowl', description: 'feeling healthy today' },
     { emoji: '🥐', name: 'butter croissant', description: 'a little treat' },
+    { emoji: '🍌', name: 'smoothie bowl', description: 'feeling healthy today' },
     { emoji: '🍵', name: 'matcha & rice cake', description: 'calm morning vibes' },
   ],
   lunch: [
@@ -33,12 +30,12 @@ const MEALS = {
   snack: [
     { emoji: '🧋', name: 'brown sugar boba', description: 'its always boba time' },
     { emoji: '🍿', name: 'popcorn', description: 'movie snack at 3pm no shame' },
-    { emoji: '🍩', name: 'glazed donut', description: 'little treat o\'clock' },
+    { emoji: '🍩', name: 'glazed donut', description: 'little treat o clock' },
     { emoji: '🥜', name: 'trail mix', description: 'pretending to be healthy' },
-    { emoji: '🍫', name: 'dark chocolate', description: 'it\'s basically a superfood' },
+    { emoji: '🍫', name: 'dark chocolate', description: 'basically a superfood' },
   ],
   drinks: [
-    { emoji: '☕', name: 'iced americano', description: 'can\'t function without it' },
+    { emoji: '☕', name: 'iced americano', description: 'can not function without it' },
     { emoji: '🧃', name: 'fresh pressed juice', description: 'orange mango hits different' },
     { emoji: '🥤', name: 'strawberry lemonade', description: 'summer in a cup' },
     { emoji: '🍵', name: 'hojicha latte', description: 'cozy drink of the day' },
@@ -57,8 +54,10 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
   }
 
-  const posts = []
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
+  const posts = []
   for (const [category, meals] of Object.entries(MEALS)) {
     const picked = pickRandom(meals, 3)
     for (const meal of picked) {
@@ -73,10 +72,20 @@ export async function GET(request: Request) {
     }
   }
 
-  const { error } = await supabase.from('meals').insert(posts)
+  const response = await fetch(`${supabaseUrl}/rest/v1/meals`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': supabaseKey,
+      'Authorization': `Bearer ${supabaseKey}`,
+      'Prefer': 'return=minimal',
+    },
+    body: JSON.stringify(posts),
+  })
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+  if (!response.ok) {
+    const error = await response.text()
+    return NextResponse.json({ error }, { status: 500 })
   }
 
   return NextResponse.json({ success: true, posted: posts.length })
