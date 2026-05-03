@@ -163,7 +163,6 @@ export default function FeedPage() {
   const filteredMeals = meals
     .filter(m => feedMode === 'everyone' || followingIds.includes(m.user_id) || m.user_id === me?.id)
     .filter(m => filter === 'all' || m.category === filter)
-
   const filteredFollowing = followingList.filter(f => f?.username?.toLowerCase().includes(followSearch.toLowerCase()))
 
   return (
@@ -229,12 +228,13 @@ export default function FeedPage() {
       {showFollowing && (
         <div onClick={() => { setShowFollowing(false); setFollowSearch('') }} style={{
           position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
-          zIndex: 200, display: 'flex', alignItems: 'flex-end', justifyContent: 'center'
+          zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: '20px'
         }}>
           <div onClick={e => e.stopPropagation()} style={{
-            background: 'var(--bg)', borderRadius: '24px 24px 0 0',
-            padding: '24px 24px 48px', width: '100%', maxWidth: '480px',
-            maxHeight: '70vh', overflowY: 'auto'
+            background: 'var(--bg)', borderRadius: '28px',
+            padding: '24px 24px 32px', width: '100%', maxWidth: '430px',
+            maxHeight: '75vh', overflowY: 'auto'
           }}>
             <div style={{ width: 40, height: 4, background: 'var(--border)', borderRadius: 4, margin: '0 auto 16px' }} />
             <div style={{ fontSize: 16, fontWeight: 900, marginBottom: 16 }}>people you follow</div>
@@ -272,28 +272,32 @@ export default function FeedPage() {
         <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 2 }}>{todayStr}</div>
       </div>
 
-      <div style={{ display: 'flex', margin: '12px 20px 0', background: 'var(--surface)', borderRadius: 14, padding: 4, alignItems: 'center' }}>
-        <button onClick={() => setFeedMode('everyone')} style={{
-          flex: 1, padding: '8px', borderRadius: 10, border: 'none', cursor: 'pointer',
-          background: feedMode === 'everyone' ? 'white' : 'transparent',
-          fontWeight: 700, fontSize: 13,
-          color: feedMode === 'everyone' ? 'var(--text)' : 'var(--muted)',
-          boxShadow: feedMode === 'everyone' ? '0 1px 4px rgba(0,0,0,0.1)' : 'none',
-          transition: 'all 0.2s'
-        }}>everyone</button>
-        <button onClick={() => setFeedMode('following')} style={{
-          flex: 1, padding: '8px', borderRadius: 10, border: 'none', cursor: 'pointer',
-          background: feedMode === 'following' ? 'white' : 'transparent',
-          fontWeight: 700, fontSize: 13,
-          color: feedMode === 'following' ? 'var(--text)' : 'var(--muted)',
-          boxShadow: feedMode === 'following' ? '0 1px 4px rgba(0,0,0,0.1)' : 'none',
-          transition: 'all 0.2s'
-        }}>following</button>
+      <div style={{ margin: '12px 20px 0' }}>
+        <div style={{ display: 'flex', background: 'var(--surface)', borderRadius: 14, padding: 4 }}>
+          <button onClick={() => setFeedMode('everyone')} style={{
+            flex: 1, padding: '8px', borderRadius: 10, border: 'none', cursor: 'pointer',
+            background: feedMode === 'everyone' ? 'white' : 'transparent',
+            fontWeight: 700, fontSize: 13,
+            color: feedMode === 'everyone' ? 'var(--text)' : 'var(--muted)',
+            boxShadow: feedMode === 'everyone' ? '0 1px 4px rgba(0,0,0,0.1)' : 'none',
+            transition: 'all 0.2s'
+          }}>everyone</button>
+          <button onClick={() => setFeedMode('following')} style={{
+            flex: 1, padding: '8px', borderRadius: 10, border: 'none', cursor: 'pointer',
+            background: feedMode === 'following' ? 'white' : 'transparent',
+            fontWeight: 700, fontSize: 13,
+            color: feedMode === 'following' ? 'var(--text)' : 'var(--muted)',
+            boxShadow: feedMode === 'following' ? '0 1px 4px rgba(0,0,0,0.1)' : 'none',
+            transition: 'all 0.2s'
+          }}>following</button>
+        </div>
         {feedMode === 'following' && (
           <button onClick={() => setShowFollowing(true)} style={{
-            background: 'none', border: 'none', cursor: 'pointer',
-            fontSize: 12, fontWeight: 700, color: 'var(--orange)', padding: '0 8px'
-          }}>see all</button>
+            width: '100%', marginTop: 8, padding: '10px',
+            borderRadius: 12, border: '1.5px solid var(--border)',
+            background: 'var(--surface)', cursor: 'pointer',
+            fontSize: 13, fontWeight: 700, color: 'var(--orange)'
+          }}>see who you follow</button>
         )}
       </div>
 
