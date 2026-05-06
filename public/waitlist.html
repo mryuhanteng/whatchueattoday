@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="light only" />
+  <title>whatchueattoday</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    :root { color-scheme: light only; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      background: #fffbf6 !important;
+      background-color: #fffbf6 !important;
+      font-family: 'Space Mono', monospace;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      color: #1a1a1a;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 32px;
+      width: 100%;
+      max-width: 400px;
+    }
+    .gif-wrap {
+      width: 160px;
+      height: 160px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .gif-wrap img { width: 100%; height: 100%; object-fit: contain; }
+    .emoji-bounce {
+      font-size: 80px;
+      animation: bounce 0.6s ease-in-out infinite alternate;
+      display: none;
+    }
+    @keyframes bounce {
+      from { transform: translateY(0px); }
+      to { transform: translateY(-20px); }
+    }
+    .join-btn {
+      background: #e85d04 !important;
+      color: white !important;
+      border: none;
+      border-radius: 50px;
+      padding: 16px 48px;
+      font-family: 'Space Mono', monospace;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s;
+      letter-spacing: 0.5px;
+      width: 100%;
+      max-width: 300px;
+    }
+    .join-btn:hover { transform: scale(1.03); }
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .overlay.active { display: flex; }
+    .modal {
+      background: #fffbf6 !important;
+      border-radius: 28px;
+      padding: 36px 28px 28px;
+      width: 100%;
+      max-width: 380px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: relative;
+    }
+    .close-btn {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: #f0e4d8;
+      border: none;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #9b8b7a;
+      font-family: 'Space Mono', monospace;
+      font-weight: 700;
+    }
+    .close-btn:hover { background: #e8d4c4; }
+    .modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #e85d04 !important;
+      text-align: center;
+      margin-bottom: 4px;
+      margin-top: 8px;
+    }
+    .input-field {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1.5px solid #f0e4d8;
+      border-radius: 14px;
+      font-family: 'Space Mono', monospace;
+      font-size: 14px;
+      background: white !important;
+      color: #1a1a1a !important;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .input-field:focus { border-color: #e85d04; }
+    .input-field::placeholder { color: #c0a898; }
+    .submit-btn {
+      background: #e85d04 !important;
+      color: white !important;
+      border: none;
+      border-radius: 50px;
+      padding: 16px;
+      font-family: 'Space Mono', monospace;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 4px;
+      width: 100%;
+    }
+    .submit-btn:disabled { opacity: 0.7; }
+    .success {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      text-align: center;
+      padding: 20px 0;
+    }
+    .success.active { display: flex; }
+    .form-fields.hidden { display: none; }
+    .success-emoji {
+      font-size: 52px;
+      animation: bounce 0.6s ease-in-out infinite alternate;
+    }
+    .success-text {
+      font-size: 15px;
+      color: #1a1a1a !important;
+      font-weight: 700;
+      line-height: 1.6;
+    }
+    .success-sub { font-size: 12px; color: #c0a898; }
+    .brand {
+      font-size: 13px;
+      color: #e85d04 !important;
+      font-weight: 700;
+    }
+    .error-msg {
+      font-size: 12px;
+      color: #e85d04;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="gif-wrap">
+    <img src="loading.gif" alt="whatchueattoday"
+      onerror="this.style.display='none'; document.querySelector('.emoji-bounce').style.display='block'" />
+    <div class="emoji-bounce">&#127869;&#65039;</div>
+  </div>
+  <button class="join-btn" onclick="openModal()">join waitlist</button>
+  <div class="brand">whatchueattoday</div>
+</div>
+
+<div class="overlay" id="overlay" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <button class="close-btn" onclick="closeModal()">&#x2715;</button>
+    <div class="modal-title">join the waitlist &#127869;&#65039;</div>
+    <div class="form-fields" id="formFields">
+      <input class="input-field" type="text" id="nameInput" placeholder="your name" />
+      <input class="input-field" type="email" id="emailInput" placeholder="your email" />
+      <p class="error-msg" id="errorMsg" style="display:none"></p>
+      <button class="submit-btn" id="submitBtn" onclick="handleSubmit()">let's eat &#127869;&#65039;</button>
+    </div>
+    <div class="success" id="successState">
+      <div class="success-emoji">&#127869;&#65039;</div>
+      <div class="success-text">you're on the list!</div>
+      <div class="success-sub">let's see what everyone's eating</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://fuxwpxuqiobboavuardc.supabase.co'
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1eHdweHVxaW9iYm9hdnVhcmRjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5OTk3NTIsImV4cCI6MjA5MjU3NTc1Mn0.EqRNvVExyNWw2eRgRgRp1AjwwSfB6TowaGYQWBNZqLg'
+
+  function openModal() {
+    document.getElementById('overlay').classList.add('active')
+    setTimeout(() => document.getElementById('nameInput').focus(), 100)
+  }
+
+  function closeModal() {
+    document.getElementById('overlay').classList.remove('active')
+    setTimeout(() => {
+      document.getElementById('formFields').classList.remove('hidden')
+      document.getElementById('successState').classList.remove('active')
+      document.getElementById('nameInput').value = ''
+      document.getElementById('emailInput').value = ''
+      document.getElementById('errorMsg').style.display = 'none'
+      document.getElementById('submitBtn').disabled = false
+      document.getElementById('submitBtn').textContent = "let's eat 🍽️"
+    }, 300)
+  }
+
+  function handleOverlayClick(e) {
+    if (e.target === document.getElementById('overlay')) closeModal()
+  }
+
+  async function handleSubmit() {
+    const name = document.getElementById('nameInput').value.trim()
+    const email = document.getElementById('emailInput').value.trim()
+    const errorMsg = document.getElementById('errorMsg')
+    const submitBtn = document.getElementById('submitBtn')
+
+    if (!name) { document.getElementById('nameInput').focus(); return }
+    if (!email || !email.includes('@')) { document.getElementById('emailInput').focus(); return }
+
+    submitBtn.disabled = true
+    submitBtn.textContent = 'joining...'
+    errorMsg.style.display = 'none'
+
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/waitlist`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({ name, email })
+      })
+
+      if (res.ok || res.status === 201) {
+        document.getElementById('formFields').classList.add('hidden')
+        document.getElementById('successState').classList.add('active')
+        setTimeout(() => closeModal(), 2500)
+      } else {
+        const err = await res.json()
+        if (err.code === '23505') {
+          errorMsg.textContent = "you're already on the list!"
+        } else {
+          errorMsg.textContent = 'something went wrong, try again'
+        }
+        errorMsg.style.display = 'block'
+        submitBtn.disabled = false
+        submitBtn.textContent = "let's eat 🍽️"
+      }
+    } catch(e) {
+      errorMsg.textContent = 'something went wrong, try again'
+      errorMsg.style.display = 'block'
+      submitBtn.disabled = false
+      submitBtn.textContent = "let's eat 🍽️"
+    }
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') handleSubmit()
+    if (e.key === 'Escape') closeModal()
+  })
+</script>
+</body>
+</html>
