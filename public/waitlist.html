@@ -241,37 +241,38 @@
     errorMsg.style.display = 'none'
 
     try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/waitlist`, {
+      const res = await fetch(SUPABASE_URL + '/rest/v1/waitlist', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'apikey': SUPABASE_ANON_KEY,
-          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
           'Prefer': 'return=minimal'
         },
-        body: JSON.stringify({ name, email })
+        body: JSON.stringify({ name: name, email: email })
       })
 
-      if (res.ok || res.status === 201) {
+      if (res.status === 201 || res.status === 200) {
         document.getElementById('formFields').classList.add('hidden')
         document.getElementById('successState').classList.add('active')
         setTimeout(() => closeModal(), 2500)
       } else {
-        const err = await res.json()
-        if (err.code === '23505') {
-          errorMsg.textContent = "you're already on the list!"
+        let errText = ''
+        try { const j = await res.json(); errText = j.code || j.message || '' } catch(e2) {}
+        if (errText === '23505') {
+          errorMsg.textContent = "you are already on the list!"
         } else {
-          errorMsg.textContent = 'something went wrong, try again'
+          errorMsg.textContent = 'error ' + res.status + ': ' + errText
         }
         errorMsg.style.display = 'block'
         submitBtn.disabled = false
-        submitBtn.textContent = "let's eat 🍽️"
+        submitBtn.textContent = "let's eat"
       }
     } catch(e) {
-      errorMsg.textContent = 'something went wrong, try again'
+      errorMsg.textContent = 'network error: ' + e.message
       errorMsg.style.display = 'block'
       submitBtn.disabled = false
-      submitBtn.textContent = "let's eat 🍽️"
+      submitBtn.textContent = "let's eat"
     }
   }
 
