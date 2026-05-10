@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase-browser'
 
 interface Comment {
   id: string
@@ -38,7 +38,7 @@ interface Props {
 }
 
 export default function MealDetailModal({ meal, currentUserId, onClose }: Props) {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const [comments, setComments] = useState<Comment[]>([])
   const [newComment, setNewComment] = useState('')
   const [loading, setLoading] = useState(true)
@@ -125,6 +125,7 @@ export default function MealDetailModal({ meal, currentUserId, onClose }: Props)
         background: '#FFF8F3',
         width: '100%',
         maxWidth: 480,
+        minHeight: '60vh',
         maxHeight: '90vh',
         borderRadius: '20px 20px 0 0',
         display: 'flex',
