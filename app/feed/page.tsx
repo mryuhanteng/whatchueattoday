@@ -152,11 +152,27 @@ export default function FeedPage() {
           user_id: meal.user_id,
           from_user_id: user.id,
           meal_id: mealId,
-          emoji
+          emoji,
+          type: 'reaction',
         })
       }
     }
     loadMeals()
+  }
+
+  function notifMessage(n: any) {
+    if (n.type === 'comment') {
+      return (
+        <>
+          <span style={{ fontWeight: 800 }}>@{n.from_user?.username}</span> commented on your <span style={{ fontWeight: 800 }}>{n.meal?.name}</span>
+        </>
+      )
+    }
+    return (
+      <>
+        <span style={{ fontWeight: 800 }}>@{n.from_user?.username}</span> reacted {n.emoji} to your <span style={{ fontWeight: 800 }}>{n.meal?.name}</span>
+      </>
+    )
   }
 
   const todayStr = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
@@ -217,7 +233,7 @@ export default function FeedPage() {
                   {n.from_user?.avatar_emoji}
                 </div>
                 <div style={{ fontSize: 12, lineHeight: 1.5 }}>
-                  <span style={{ fontWeight: 800 }}>@{n.from_user?.username}</span> reacted {n.emoji} to your <span style={{ fontWeight: 800 }}>{n.meal?.name}</span>
+                  {notifMessage(n)}
                 </div>
               </div>
             ))}
