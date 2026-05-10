@@ -2,6 +2,7 @@
 import { useState, Fragment } from 'react'
 import { Meal } from '@/app/feed/page'
 import { createClient } from '@/lib/supabase-browser'
+import MealDetailModal from './MealDetailModal'
 
 const EMOJI_PLATE = String.fromCodePoint(0x1F37D) + String.fromCodePoint(0xFE0F)
 const EMOJI_SUN = String.fromCodePoint(0x2600) + String.fromCodePoint(0xFE0F)
@@ -31,6 +32,7 @@ export default function MealCard({ meal, currentUserId, onReact, onDelete }: {
   const supabase = createClient()
   const [showConfirm, setShowConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [showDetail, setShowDetail] = useState(false)
 
   async function handleDelete() {
     setDeleting(true)
@@ -42,13 +44,16 @@ export default function MealCard({ meal, currentUserId, onReact, onDelete }: {
 
   return (
     <Fragment>
-      <div className="meal-card">
+      <div className="meal-card" onClick={() => setShowDetail(true)} style={{ cursor: 'pointer' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
           <div className="avatar" style={{ background: profile?.avatar_color || '#FFE8D6' }}>
             {profile?.avatar_emoji || EMOJI_PLATE}
           </div>
           <div>
-            <div style={{ fontSize: 14, fontWeight: 800, cursor: 'pointer' }} onClick={() => window.location.href = `/profile/${profile?.username}`}>@{profile?.username || 'anon'}</div>
+            <div style={{ fontSize: 14, fontWeight: 800, cursor: 'pointer' }}
+              onClick={e => { e.stopPropagation(); window.location.href = `/profile/${profile?.username}` }}>
+              @{profile?.username || 'anon'}
+            </div>
             <div style={{ fontSize: 12, color: 'var(--muted)' }}>{timeAgo(meal.created_at)}</div>
           </div>
           {isMe && (
@@ -58,7 +63,7 @@ export default function MealCard({ meal, currentUserId, onReact, onDelete }: {
             }}>you</span>
           )}
           {isMe && (
-            <button onClick={() => setShowConfirm(true)} style={{
+            <button onClick={e => { e.stopPropagation(); setShowConfirm(true) }} style={{
               background: 'none', border: 'none', cursor: 'pointer',
               fontSize: 16, color: 'var(--muted)', padding: '2px 6px'
             }}>x</button>
@@ -77,16 +82,20 @@ export default function MealCard({ meal, currentUserId, onReact, onDelete }: {
           <div style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.5 }}>{meal.description}</div>
         )}
 
-        <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap', alignItems: 'center' }}>
           {meal.reactions.filter(r => r.count > 0 || DEFAULT_EMOJIS.includes(r.emoji)).map(r => (
             <button
               key={r.emoji}
               className={`reaction-btn ${r.user_reacted ? 'reacted' : ''}`}
-              onClick={() => onReact(meal.id, r.emoji)}
+              onClick={e => { e.stopPropagation(); onReact(meal.id, r.emoji) }}
             >
               {r.emoji} {r.count > 0 ? r.count : ''}
             </button>
           ))}
+          {/* comment count hint */}
+          <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--muted)' }}>
+            💬 tap to comment
+          </span>
         </div>
       </div>
 
@@ -122,6 +131,14 @@ export default function MealCard({ meal, currentUserId, onReact, onDelete }: {
             </div>
           </div>
         </div>
+      )}
+
+      {showDetail && (
+        <MealDetailModal
+          meal={meal}
+          currentUserId={currentUserId}
+          onClose={() => setShowDetail(false)}
+        />
       )}
     </Fragment>
   )
