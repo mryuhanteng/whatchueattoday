@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase-browser'
 import { useRouter } from 'next/navigation'
 import AddMealModal from '@/components/AddMealModal'
 import MealCard from '@/components/MealCard'
+import MealDetailModal from '@/components/MealDetailModal'
 
 export type Profile = { id: string; username: string; avatar_emoji: string; avatar_color: string }
 export type Meal = {
@@ -49,6 +50,7 @@ export default function FeedPage() {
   const [unreadCount, setUnreadCount] = useState(0)
   const [showNotifs, setShowNotifs] = useState(false)
   const [notifs, setNotifs] = useState<any[]>([])
+  const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null)
   const supabase = createClient()
   const router = useRouter()
 
@@ -355,7 +357,14 @@ export default function FeedPage() {
           </p>
         )}
         {filteredMeals.map(meal => (
-          <MealCard key={meal.id} meal={meal} currentUserId={me?.id ?? ''} onReact={handleReact} onDelete={(id) => setMeals(meals.filter(m => m.id !== id))} />
+          <MealCard
+            key={meal.id}
+            meal={meal}
+            currentUserId={me?.id ?? ''}
+            onReact={handleReact}
+            onDelete={(id) => setMeals(meals.filter(m => m.id !== id))}
+            onOpenComments={(meal) => setSelectedMeal(meal)}
+          />
         ))}
       </div>
 
@@ -364,6 +373,14 @@ export default function FeedPage() {
           userId={me.id}
           onClose={() => setShowModal(false)}
           onPosted={() => { setShowModal(false); loadMeals() }}
+        />
+      )}
+
+      {selectedMeal && (
+        <MealDetailModal
+          meal={selectedMeal}
+          currentUserId={me?.id ?? null}
+          onClose={() => setSelectedMeal(null)}
         />
       )}
     </div>
