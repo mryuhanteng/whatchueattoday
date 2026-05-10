@@ -111,7 +111,7 @@ export default function MealDetailModal({ meal, currentUserId, onClose }: Props)
 
   return (
     <>
-      {/* backdrop — tapping closes */}
+      {/* backdrop */}
       <div
         onClick={onClose}
         style={{
@@ -120,12 +120,12 @@ export default function MealDetailModal({ meal, currentUserId, onClose }: Props)
         }}
       />
 
-      {/* sheet — fixed height, never full screen */}
+      {/* sheet */}
       <div style={{
         position: 'fixed',
         bottom: 0, left: 0, right: 0,
         zIndex: 1000,
-        height: '75vh',
+        maxHeight: '75vh',
         background: '#FFF8F3',
         borderRadius: '20px 20px 0 0',
         display: 'flex',
@@ -181,8 +181,8 @@ export default function MealDetailModal({ meal, currentUserId, onClose }: Props)
           </div>
         </div>
 
-        {/* comments list — scrollable middle */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '12px 16px' }}>
+        {/* comments list */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '12px 16px', minHeight: 0 }}>
           {loading ? (
             <div style={{ textAlign: 'center', padding: 24, fontFamily: 'Space Mono, monospace', fontSize: 13, color: '#aaa' }}>
               loading...
@@ -232,9 +232,9 @@ export default function MealDetailModal({ meal, currentUserId, onClose }: Props)
           <div ref={commentsEndRef} />
         </div>
 
-        {/* input — pinned to bottom of sheet */}
+        {/* input */}
         <div style={{
-          padding: '10px 16px 32px',
+          padding: '10px 16px 8px',
           borderTop: '1px solid #F0E8E0',
           background: '#FFF8F3',
           display: 'flex', gap: 8, alignItems: 'center',
